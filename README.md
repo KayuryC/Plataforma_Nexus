@@ -6,7 +6,7 @@ Plataforma de gestão de famílias e produção agrícola da comunidade de Jutai
 
 - `plataformanexus.html`: frontend protótipo (admin e produtor).
 - `backend/`: API de autenticação real (Express + JSON local + JWT em cookie HttpOnly).
-- `api/ia.mjs`: função Edge para recomendações com IA (pronta para Vercel).
+- `api/ia.js`: função Edge para recomendações com IA (pronta para Vercel).
 - `vercel.json`: rota `/` apontando para `plataformanexus.html`.
 
 ## Como rodar (modo simples)
