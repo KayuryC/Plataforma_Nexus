@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nexus — Plataforma</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --vd:#1C3D22;--vm:#2D5E35;--vf:#4A8C55;--vl:#7DB868;--vc:#B8D9A4;
+  --terra:#3D2010;--areia:#EDE8D8;--creme:#F8F4EA;--branco:#fff;
+  --ouro:#C8893A;--cinza:#6B7068;--bg:#F2F0E8;--sidebar:240px;
+}
+html,body{height:100%;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--terra);overflow-x:hidden}
+a{text-decoration:none;color:inherit;cursor:pointer}
+button{cursor:pointer;font-family:'IBM Plex Sans',sans-serif}
+input,textarea,select{font-family:'IBM Plex Sans',sans-serif}
+
+/* ══ LOGIN ══ */
+#login-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--vd);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+}
+#login-screen::before{
+  content:'';position:absolute;right:-100px;top:-100px;
+  width:500px;height:500px;border-radius:50%;
+  border:80px solid rgba(123,184,104,.06);pointer-events:none;
+}
+#login-screen::after{
+  content:'';position:absolute;left:-80px;bottom:-80px;
+  width:350px;height:350px;border-radius:50%;
+  border:60px solid rgba(123,184,104,.04);pointer-events:none;
+}
+.login-box{
+  background:rgba(255,255,255,.04);border:1px solid rgba(123,184,104,.15);
+  border-radius:12px;padding:3rem;width:420px;max-width:95vw;
+  position:relative;z-index:1;text-align:center;
+}
+.login-logo{font-family:'Lora',serif;font-size:2.2rem;font-weight:700;color:var(--creme);margin-bottom:.3rem}
+.login-sub{font-size:.78rem;text-transform:uppercase;letter-spacing:.2em;color:var(--vl);margin-bottom:2.5rem}
+.login-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.15em;color:rgba(184,217,164,.5);margin-bottom:1rem;text-align:left}
+.perfil-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}
+.perfil-card{
+  border:1.5px solid rgba(123,184,104,.2);border-radius:8px;padding:1.4rem 1rem;
+  cursor:pointer;transition:all .25s;text-align:center;
+}
+.perfil-card:hover{border-color:var(--vl);background:rgba(123,184,104,.08);transform:translateY(-2px)}
+.perfil-card.selected{border-color:var(--vl);background:rgba(123,184,104,.15)}
+.perfil-icon{font-size:1.8rem;margin-bottom:.6rem}
+.perfil-title{font-size:.88rem;font-weight:500;color:var(--creme);margin-bottom:.2rem}
+.perfil-desc{font-size:.72rem;color:rgba(184,217,164,.6)}
+.login-divider{border:none;border-top:1px solid rgba(123,184,104,.1);margin:1.5rem 0}
+.login-user-select{
+  width:100%;padding:.7rem 1rem;border-radius:6px;
+  border:1px solid rgba(123,184,104,.2);background:rgba(255,255,255,.05);
+  color:var(--creme);font-size:.88rem;margin-bottom:1.2rem;
+}
+.login-user-select option{background:var(--vd);color:var(--creme)}
+.btn-login{
+  width:100%;padding:.9rem;background:var(--vl);border:none;border-radius:6px;
+  color:var(--vd);font-size:.88rem;font-weight:600;letter-spacing:.05em;
+  transition:background .2s,transform .15s;
+}
+.btn-login:hover{background:var(--vc);transform:translateY(-1px)}
+
+/* ══ APP LAYOUT ══ */
+.app{display:flex;min-height:100vh;display:none}
+.app.visible{display:flex}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--vd);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50}
+.sb-logo{padding:1.5rem 1.4rem 1rem;font-family:'Lora',serif;font-weight:700;font-size:1.2rem;color:var(--creme);border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo span{display:block;font-size:.65rem;font-weight:300;color:var(--vl);letter-spacing:.12em;text-transform:uppercase;margin-top:.2rem}
+.sb-nav{flex:1;padding:1rem 0;overflow-y:auto}
+.sb-section{font-size:.62rem;text-transform:uppercase;letter-spacing:.16em;color:rgba(184,217,164,.4);padding:.8rem 1.4rem .4rem}
+.sb-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.4rem;font-size:.82rem;color:rgba(237,232,216,.7);transition:background .2s,color .2s;border-left:2px solid transparent}
+.sb-item:hover{background:rgba(255,255,255,.06);color:var(--creme)}
+.sb-item.active{background:rgba(123,184,104,.12);color:var(--vl);border-left-color:var(--vl)}
+.sb-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.5}
+.sb-profile{padding:1rem 1.4rem;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:.7rem}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--vm);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:500;color:var(--vl);flex-shrink:0}
+.sb-name{font-size:.8rem;color:rgba(237,232,216,.8)}
+.sb-role{font-size:.7rem;color:rgba(123,184,104,.6)}
+.sb-badge{margin-left:auto;background:rgba(123,184,104,.2);color:var(--vl);font-size:.6rem;padding:2px 7px;border-radius:20px}
+.sb-logout{padding:.6rem 1.4rem;font-size:.75rem;color:rgba(237,232,216,.4);cursor:pointer;transition:color .2s;border:none;background:none;display:flex;align-items:center;gap:.5rem;width:100%}
+.sb-logout:hover{color:rgba(237,232,216,.8)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--branco);border-bottom:1px solid rgba(45,94,53,.1);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-title{font-family:'Lora',serif;font-size:1.1rem;font-weight:600;color:var(--vd)}
+.topbar-right{display:flex;align-items:center;gap:.8rem}
+.tag{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;padding:.3rem .8rem;border-radius:2px;font-weight:500}
+.tag-green{background:rgba(74,140,85,.1);color:var(--vf)}
+.tag-amber{background:rgba(200,137,58,.12);color:var(--ouro)}
+.tag-blue{background:rgba(24,95,165,.1);color:#185FA5}
+.tag-prod{background:rgba(61,32,16,.1);color:var(--terra)}
+.btn{padding:.55rem 1.2rem;border-radius:3px;font-size:.8rem;font-weight:500;border:none;transition:all .2s}
+.btn-primary{background:var(--vf);color:var(--branco)}
+.btn-primary:hover{background:var(--vm)}
+.btn-ghost{background:transparent;border:1px solid rgba(45,94,53,.2);color:var(--cinza)}
+.btn-ghost:hover{background:var(--areia)}
+.btn-sm{padding:.4rem .85rem;font-size:.75rem}
+.content{flex:1;padding:2rem}
+.tabs{display:flex;gap:0;border-bottom:1px solid rgba(45,94,53,.12);margin-bottom:2rem}
+.tab{padding:.7rem 1.4rem;font-size:.82rem;font-weight:400;color:var(--cinza);border:none;background:transparent;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;margin-bottom:-1px}
+.tab.active{color:var(--vd);border-bottom-color:var(--vf);font-weight:500}
+.tab:hover{color:var(--vd)}
+.view{display:none}
+.view.active{display:block}
+.card{background:var(--branco);border:1px solid rgba(45,94,53,.1);border-radius:6px;padding:1.5rem}
+.card-sm{padding:1rem 1.2rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.stat-card{background:var(--branco);border:1px solid rgba(45,94,53,.1);border-radius:6px;padding:1.2rem}
+.stat-num{font-family:'Lora',serif;font-size:2rem;font-weight:700;color:var(--vd)}
+.stat-label{font-size:.78rem;color:var(--cinza);margin-top:.3rem;font-weight:300}
+.stat-delta{font-size:.72rem;color:var(--vf);margin-top:.2rem}
+.family-row{display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--branco);border:1px solid rgba(45,94,53,.08);border-radius:6px;margin-bottom:.75rem;transition:border-color .2s,transform .15s;cursor:pointer}
+.family-row:hover{border-color:rgba(74,140,85,.35);transform:translateX(2px)}
+.fam-avatar{width:40px;height:40px;border-radius:50%;background:rgba(74,140,85,.12);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:500;color:var(--vf);flex-shrink:0}
+.fam-name{font-weight:500;font-size:.9rem;color:var(--vd)}
+.fam-meta{font-size:.78rem;color:var(--cinza);margin-top:.1rem}
+.fam-status{margin-left:auto;display:flex;align-items:center;gap:.7rem}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-green{background:#4A8C55}.dot-amber{background:#C8893A}.dot-gray{background:#B4B2A9}
+.ficha-header{background:var(--vd);border-radius:6px;padding:1.8rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.ficha-header::before{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;border:40px solid rgba(123,184,104,.08)}
+.ficha-nome{font-family:'Lora',serif;font-size:1.4rem;font-weight:700;color:var(--creme)}
+.ficha-sub{font-size:.8rem;color:rgba(184,217,164,.6);margin-top:.3rem}
+.ficha-tags{display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap}
+.ficha-tag{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;padding:.25rem .7rem;border-radius:2px;border:1px solid rgba(123,184,104,.3);color:var(--vl)}
+.form-group{margin-bottom:1.2rem}
+.form-label{font-size:.78rem;font-weight:500;color:var(--vd);margin-bottom:.4rem;display:block}
+.form-input{width:100%;padding:.6rem .9rem;border:1px solid rgba(45,94,53,.2);border-radius:4px;font-size:.85rem;background:var(--branco);color:var(--terra);transition:border-color .2s}
+.form-input:focus{outline:none;border-color:var(--vf)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7068' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .8rem center}
+textarea.form-input{resize:vertical;min-height:90px}
+.caderno-week{border:1px solid rgba(45,94,53,.1);border-radius:6px;margin-bottom:1rem;overflow:hidden}
+.caderno-week-header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;background:var(--branco);cursor:pointer}
+.caderno-week-header:hover{background:var(--areia)}
+.week-label{font-size:.85rem;font-weight:500;color:var(--vd)}
+.week-date{font-size:.75rem;color:var(--cinza)}
+.caderno-week-body{padding:1.2rem;background:rgba(248,244,234,.5);border-top:1px solid rgba(45,94,53,.08)}
+.obs-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.obs-item{background:var(--branco);padding:.9rem;border-radius:4px;border:1px solid rgba(45,94,53,.08)}
+.obs-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);margin-bottom:.35rem}
+.obs-value{font-size:.85rem;color:var(--terra)}
+.foto-thumb{width:60px;height:60px;border-radius:4px;background:rgba(74,140,85,.1);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(74,140,85,.3)}
+.ia-card{background:linear-gradient(135deg,var(--vd) 0%,var(--vm) 100%);border-radius:6px;padding:1.5rem;color:var(--creme);margin-bottom:1rem;position:relative;overflow:hidden}
+.ia-card::after{content:'IA';position:absolute;right:1.2rem;top:1rem;font-size:2.5rem;font-weight:700;color:rgba(123,184,104,.12);font-family:'Lora',serif}
+.ia-badge{font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--vl);margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem}
+.ia-badge::before{content:'●';font-size:8px}
+.ia-title{font-family:'Lora',serif;font-size:1rem;font-weight:600;margin-bottom:.5rem}
+.ia-text{font-size:.82rem;font-weight:300;color:rgba(184,217,164,.85);line-height:1.65}
+.ia-actions{display:flex;gap:.7rem;margin-top:1rem;flex-wrap:wrap}
+.ia-btn{font-size:.72rem;padding:.4rem .9rem;border-radius:3px;border:1px solid rgba(123,184,104,.35);color:var(--vl);background:transparent;transition:background .2s}
+.ia-btn:hover{background:rgba(123,184,104,.15)}
+.video-card{background:var(--branco);border:1px solid rgba(45,94,53,.1);border-radius:6px;overflow:hidden;transition:transform .2s,border-color .2s}
+.video-card:hover{transform:translateY(-2px);border-color:rgba(74,140,85,.3)}
+.video-thumb{height:110px;background:var(--vm);display:flex;align-items:center;justify-content:center;position:relative}
+.video-play{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center}
+.video-play svg{width:16px;height:16px;fill:white;stroke:none}
+.video-tag{position:absolute;bottom:8px;left:8px;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;background:rgba(0,0,0,.5);color:white;padding:2px 7px;border-radius:2px}
+.video-info{padding:.9rem}
+.video-title{font-size:.85rem;font-weight:500;color:var(--vd);margin-bottom:.3rem}
+.video-meta{font-size:.75rem;color:var(--cinza)}
+.upload-zone{border:2px dashed rgba(74,140,85,.3);border-radius:6px;padding:2rem;text-align:center;transition:border-color .2s,background .2s;cursor:pointer}
+.upload-zone:hover{border-color:var(--vf);background:rgba(74,140,85,.04)}
+.upload-icon{width:40px;height:40px;margin:0 auto .8rem;opacity:.5}
+.upload-text{font-size:.85rem;color:var(--cinza)}
+.upload-sub{font-size:.75rem;color:rgba(107,112,104,.6);margin-top:.3rem}
+.sec-title{font-family:'Lora',serif;font-size:1rem;font-weight:600;color:var(--vd);margin-bottom:1rem}
+.sec-sub{font-size:.8rem;color:var(--cinza);margin-bottom:1.2rem;margin-top:-.6rem}
+.alert{padding:.9rem 1.1rem;border-radius:4px;font-size:.82rem;margin-bottom:1rem;display:flex;gap:.7rem;align-items:flex-start}
+.alert-green{background:rgba(74,140,85,.1);border-left:3px solid var(--vf);color:var(--vm)}
+.alert-amber{background:rgba(200,137,58,.1);border-left:3px solid var(--ouro);color:#7A4F10}
+.alert svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;stroke:currentColor;fill:none;stroke-width:1.5}
+.prog-bar{height:6px;background:rgba(45,94,53,.1);border-radius:3px;margin-top:.4rem}
+.prog-fill{height:100%;border-radius:3px;background:var(--vf)}
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(28,61,34,.45);z-index:200;align-items:center;justify-content:center}
+.modal-wrap.open{display:flex}
+.modal{background:var(--branco);border-radius:8px;width:580px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-header{padding:1.4rem 1.6rem;border-bottom:1px solid rgba(45,94,53,.1);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Lora',serif;font-size:1rem;font-weight:600;color:var(--vd)}
+.modal-close{background:none;border:none;font-size:1.3rem;color:var(--cinza);line-height:1}
+.modal-body{padding:1.6rem}
+.modal-footer{padding:1rem 1.6rem;border-top:1px solid rgba(45,94,53,.1);display:flex;justify-content:flex-end;gap:.7rem}
+.notif{width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0}
+
+/* PRODUTOR PAINEL */
+.prod-hero{background:linear-gradient(135deg,var(--vd) 0%,var(--vm) 100%);border-radius:8px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.prod-hero::before{content:'';position:absolute;right:-60px;top:-60px;width:250px;height:250px;border-radius:50%;border:50px solid rgba(123,184,104,.07)}
+.prod-hero-nome{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--creme)}
+.prod-hero-sub{font-size:.82rem;color:rgba(184,217,164,.7);margin-top:.3rem}
+.prod-status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.2rem}
+.prod-stat{background:rgba(255,255,255,.07);border-radius:6px;padding:.8rem 1rem}
+.prod-stat-num{font-family:'Lora',serif;font-size:1.5rem;font-weight:700;color:var(--vl)}
+.prod-stat-lbl{font-size:.7rem;color:rgba(184,217,164,.6);margin-top:.2rem}
+
+/* UPLOAD FOTO PREVIEW */
+.foto-preview{border-radius:6px;overflow:hidden;border:2px solid rgba(74,140,85,.3);margin-top:.8rem;display:none}
+.foto-preview img{width:100%;display:block}
+
+@media(max-width:900px){
+  .sidebar{width:60px;min-width:60px}
+  .sb-logo,.sb-section,.sb-name,.sb-role,.sb-badge,.sb-item span{display:none}
+  .sb-item{padding:.65rem;justify-content:center}
+  .main{margin-left:60px}
+  .grid-2,.grid-3,.grid-4,.prod-status-grid{grid-template-columns:1fr}
+  .obs-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TELA DE LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Nexus</div>
+    <div class="login-sub">Plataforma de Gestão Agrícola</div>
+    <div class="login-label">Selecione seu perfil de acesso</div>
+    <div class="perfil-cards">
+      <div class="perfil-card selected" id="card-admin" onclick="selectPerfil('admin')">
+        <div class="perfil-icon">🧑‍💼</div>
+        <div class="perfil-title">Administrador</div>
+        <div class="perfil-desc">Gestão completa de famílias e registros</div>
+      </div>
+      <div class="perfil-card" id="card-produtor" onclick="selectPerfil('produtor')">
+        <div class="perfil-icon">👨‍🌾</div>
+        <div class="perfil-title">Produtor</div>
+        <div class="perfil-desc">Acesso ao meu lote e recomendações</div>
+      </div>
+    </div>
+    <div class="login-label">Usuário</div>
+    <select class="login-user-select" id="login-user-select">
+      <option value="donato">Donato Silva — Gestor · Vila Jutaí</option>
+      <option value="marcelo">Marcelo Heinen — Coordenador de Campo</option>
+    </select>
+    <button class="btn-login" onclick="fazerLogin()">Entrar na Plataforma</button>
+  </div>
+</div>
+
+<!-- ══ PLATAFORMA ══ -->
+<div class="app" id="app">
+
+<!-- SIDEBAR ADMIN -->
+<aside class="sidebar" id="sidebar-admin">
+  <div class="sb-logo">Nexus<span>Plataforma</span></div>
+  <nav class="sb-nav">
+    <div class="sb-section">Visão Geral</div>
+    <a class="sb-item active" onclick="showView('dashboard')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <div class="sb-section">Gestão</div>
+    <a class="sb-item" onclick="showView('familias')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Famílias</span>
+      <span class="sb-badge">18</span>
+    </a>
+    <a class="sb-item" onclick="showView('caderno')">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      <span>Cadernos de Campo</span>
+    </a>
+    <a class="sb-item" onclick="showView('novocaderno')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span>Novo Registro</span>
+    </a>
+    <div class="sb-section">Inteligência</div>
+    <a class="sb-item" onclick="showView('ia')">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>Recomendações IA</span>
+      <span class="notif"></span>
+    </a>
+    <a class="sb-item" onclick="showView('videos')">
+      <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      <span>Vídeos Didáticos</span>
+    </a>
+    <div class="sb-section">Acesso</div>
+    <a class="sb-item" onclick="showView('sem-filhos')">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Produtores s/ filhos</span>
+    </a>
+    <a class="sb-item" onclick="showView('relatorios')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Relatórios</span>
+    </a>
+  </nav>
+  <div class="sb-profile">
+    <div class="sb-avatar" id="sb-avatar-txt">DO</div>
+    <div>
+      <div class="sb-name" id="sb-name-txt">Donato Silva</div>
+      <div class="sb-role" id="sb-role-txt">Gestor · Vila Jutaí</div>
+    </div>
+  </div>
+  <button class="sb-logout" onclick="voltarLogin()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sair
+  </button>
+</aside>
+
+<!-- SIDEBAR PRODUTOR -->
+<aside class="sidebar" id="sidebar-produtor" style="display:none">
+  <div class="sb-logo">Nexus<span>Meu Lote</span></div>
+  <nav class="sb-nav">
+    <div class="sb-section">Meu Painel</div>
+    <a class="sb-item active" onclick="showView('prod-home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Minha Propriedade</span>
+    </a>
+    <a class="sb-item" onclick="showView('prod-ia')">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>Recomendações da IA</span>
+      <span class="notif"></span>
+    </a>
+    <a class="sb-item" onclick="showView('prod-caderno')">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      <span>Meu Caderno</span>
+    </a>
+    <a class="sb-item" onclick="showView('prod-enviar')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span>Enviar Foto do Caderno</span>
+    </a>
+    <a class="sb-item" onclick="showView('videos')">
+      <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      <span>Vídeos Didáticos</span>
+    </a>
+  </nav>
+  <div class="sb-profile">
+    <div class="sb-avatar" style="background:rgba(200,137,58,.2);color:var(--ouro)" id="sb-prod-avatar">RA</div>
+    <div>
+      <div class="sb-name" id="sb-prod-name">Raimundo Nonato</div>
+      <div class="sb-role">Produtor · Vila Jutaí</div>
+    </div>
+  </div>
+  <button class="sb-logout" onclick="voltarLogin()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sair
+  </button>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <header class="topbar">
+    <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <div class="topbar-right">
+      <span class="tag tag-green" id="topbar-ctx">Vila de Jutaí</span>
+      <button class="btn btn-primary btn-sm" id="btn-nova-familia" onclick="openModal('modal-nova-familia')">+ Nova Família</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══ DASHBOARD ADMIN ═══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="grid-4" style="margin-bottom:1.5rem">
+        <div class="stat-card">
+          <div class="stat-num">18</div>
+          <div class="stat-label">Famílias cadastradas</div>
+          <div class="stat-delta">↑ 6 este mês · Meta: 31</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">14</div>
+          <div class="stat-label">Cadernos atualizados</div>
+          <div class="stat-delta">Semana atual · 78%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Alertas da IA</div>
+          <div class="stat-delta" style="color:var(--ouro)">Requer atenção</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">245</div>
+          <div class="stat-label">Hectares em SAF</div>
+          <div class="stat-delta">Janela 25/26</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="sec-title">Pendências desta semana</div>
+          <div class="alert alert-amber">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div><strong>Família Silva</strong> — caderno não enviado há 14 dias. Contato necessário.</div>
+          </div>
+          <div class="alert alert-green">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Raimundo Nonato</strong> — foto do caderno recebida. IA analisando.</div>
+          </div>
+          <div class="alert alert-amber">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div><strong>Família Gonçalves</strong> — 3 semanas sem registro. Semana 5 em aberto.</div>
+          </div>
+          <div class="alert alert-green">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Família Pompeu</strong> — cupuaçu em florescimento. IA gerou alerta de adubação.</div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-title">Engajamento das famílias</div>
+          <div class="card card-sm">
+            <div style="display:flex;justify-content:space-between;margin-bottom:.3rem"><span style="font-size:.82rem;font-weight:500">Raimundo Nonato Gonçalves</span><span style="font-size:.75rem;color:var(--cinza)">Sem. 9</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width:92%"></div></div>
+            <div style="font-size:.72rem;color:var(--cinza);margin-top:.3rem">92% — Excelente</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;margin-top:1rem"><span style="font-size:.82rem;font-weight:500">José Maria Pompeu</span><span style="font-size:.75rem;color:var(--cinza)">Sem. 8</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width:78%"></div></div>
+            <div style="font-size:.72rem;color:var(--cinza);margin-top:.3rem">78% — Bom</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;margin-top:1rem"><span style="font-size:.82rem;font-weight:500">Manoel Maria Gonçalves</span><span style="font-size:.75rem;color:var(--cinza)">Sem. 6</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width:55%"></div></div>
+            <div style="font-size:.72rem;color:var(--cinza);margin-top:.3rem">55% — Regular</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;margin-top:1rem"><span style="font-size:.82rem;font-weight:500">Faustino Alves</span><span style="font-size:.75rem;color:var(--ouro)">Sem. 2</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width:22%;background:var(--ouro)"></div></div>
+            <div style="font-size:.72rem;color:var(--ouro);margin-top:.3rem">22% — Atenção</div>
+          </div>
+        </div>
+      </div>
+      <!-- Resumo produção -->
+      <div style="margin-top:1.5rem">
+        <div class="sec-title">Produção estimada — Janela 25/26 (dados EMBRAPA/CONAB)</div>
+        <div class="grid-4">
+          <div class="card card-sm" style="border-top:3px solid #2d5e35">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);margin-bottom:.4rem">Dendê</div>
+            <div style="font-family:'Lora',serif;font-size:1.4rem;font-weight:700;color:var(--vd)">47.495</div>
+            <div style="font-size:.75rem;color:var(--cinza)">mudas plantadas</div>
+            <div style="font-size:.72rem;color:var(--vf);margin-top:.3rem">R$ 0,55/kg CFF · BASA</div>
+          </div>
+          <div class="card card-sm" style="border-top:3px solid #3d2010">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);margin-bottom:.4rem">Cacau</div>
+            <div style="font-family:'Lora',serif;font-size:1.4rem;font-weight:700;color:var(--vd)">Ano 2</div>
+            <div style="font-size:.75rem;color:var(--cinza)">plantio em andamento</div>
+            <div style="font-size:.72rem;color:var(--vf);margin-top:.3rem">R$ 10,50/kg amêndoa · CONAB</div>
+          </div>
+          <div class="card card-sm" style="border-top:3px solid #1a3a30">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);margin-bottom:.4rem">Açaí</div>
+            <div style="font-family:'Lora',serif;font-size:1.4rem;font-weight:700;color:var(--vd)">104/ha</div>
+            <div style="font-size:.75rem;color:var(--cinza)">plantas por hectare</div>
+            <div style="font-size:.72rem;color:var(--vf);margin-top:.3rem">R$ 1,80/kg · Abrafrutas 24</div>
+          </div>
+          <div class="card card-sm" style="border-top:3px solid #c8893a">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);margin-bottom:.4rem">Renda Est. Ano 10</div>
+            <div style="font-family:'Lora',serif;font-size:1.4rem;font-weight:700;color:var(--vd)">R$9.198</div>
+            <div style="font-size:.75rem;color:var(--cinza)">por família / mês</div>
+            <div style="font-size:.72rem;color:var(--ouro);margin-top:.3rem">vs R$800 média regional</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FAMÍLIAS ═══ -->
+    <div class="view" id="view-familias">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <div>
+          <div class="sec-title" style="margin-bottom:.2rem">Famílias cadastradas</div>
+          <div style="font-size:.8rem;color:var(--cinza)">18 famílias · Vila de Jutaí · 245 ha em SAF</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-nova-familia')">+ Cadastrar Família</button>
+      </div>
+      <div id="lista-familias">
+        <!-- Preenchido pelo JS -->
+      </div>
+    </div>
+
+    <!-- ═══ FICHA FAMÍLIA ═══ -->
+    <div class="view" id="view-ficha">
+      <div style="margin-bottom:1.2rem">
+        <button class="btn btn-ghost btn-sm" onclick="showView('familias')">← Voltar para Famílias</button>
+      </div>
+      <div class="ficha-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="ficha-nome" id="ficha-nome">—</div>
+            <div class="ficha-sub" id="ficha-sub">—</div>
+            <div class="ficha-tags" id="ficha-tags"></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:.7rem;color:rgba(184,217,164,.5);text-transform:uppercase;letter-spacing:.1em">Semana</div>
+            <div style="font-family:'Lora',serif;font-size:2rem;font-weight:700;color:var(--vl)" id="ficha-semana">—</div>
+            <div style="font-size:.72rem;color:rgba(184,217,164,.5)">de 24</div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'tab-dados')">Dados Iniciais</button>
+        <button class="tab" onclick="switchTab(this,'tab-caderno')">Caderno de Campo</button>
+        <button class="tab" onclick="switchTab(this,'tab-ia')">Recomendações IA</button>
+      </div>
+      <div id="tab-dados"></div>
+      <div id="tab-caderno" style="display:none"></div>
+      <div id="tab-ia" style="display:none"></div>
+    </div>
+
+    <!-- ═══ CADERNOS GERAL ═══ -->
+    <div class="view" id="view-caderno">
+      <div class="sec-title">Cadernos de Campo — Semana Atual</div>
+      <div class="sec-sub">Registros de todas as famílias · Semana 9 / 2025</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem" id="cards-caderno"></div>
+    </div>
+
+    <!-- ═══ NOVO REGISTRO ═══ -->
+    <div class="view" id="view-novocaderno">
+      <div class="sec-title">Novo Registro de Caderno</div>
+      <div class="sec-sub">Preencha manualmente ou envie foto do caderno físico</div>
+      <div class="grid-2" style="align-items:start">
+        <div>
+          <div class="card" style="margin-bottom:1.2rem">
+            <div class="form-group">
+              <label class="form-label">Família / Produtor</label>
+              <select class="form-input form-select" id="select-familia-registro">
+                <option>Raimundo Nonato Gonçalves</option>
+                <option>José Maria Pompeu</option>
+                <option>Manoel Maria Gonçalves</option>
+                <option>Faustino Alves</option>
+                <option>Océlio Gaia do Carmo</option>
+                <option>Maria dos Santos Ferreira</option>
+                <option>Antonio Lemos da Silva</option>
+              </select>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Semana</label>
+                <input type="number" class="form-input" value="9" min="1" max="52"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Data</label>
+                <input type="date" class="form-input" value="2025-05-12"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Condição do Solo</label>
+              <select class="form-input form-select">
+                <option>Solo seco</option><option>Boa umidade</option>
+                <option>Solo encharcado</option><option>Solo compactado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Clima da semana</label>
+              <select class="form-input form-select">
+                <option>Sol forte</option><option>Chuvas regulares</option>
+                <option>Misto (sol e chuva)</option><option>Seca prolongada</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Atividades realizadas</label>
+              <textarea class="form-input" placeholder="Ex: capina, adubação, irrigação, colheita..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações e dúvidas da família</label>
+              <textarea class="form-input" placeholder="Anote as perguntas dos pais e observações do aluno..."></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:.8rem">
+            <button class="btn btn-primary" onclick="salvarRegistro()">Salvar e Enviar para IA</button>
+            <button class="btn btn-ghost">Salvar rascunho</button>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="sec-title">Foto do Caderno Físico</div>
+            <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="#4A8C55" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <div class="upload-text">Tirar foto ou enviar imagem</div>
+              <div class="upload-sub">JPG, PNG · Máx. 10MB</div>
+            </div>
+            <input type="file" id="file-input" accept="image/*" style="display:none" onchange="previewFoto(this)"/>
+            <div class="foto-preview" id="foto-preview-admin">
+              <img id="foto-preview-img-admin" src="" alt=""/>
+            </div>
+            <div style="margin-top:1rem;padding:.9rem;background:rgba(74,140,85,.07);border-radius:4px">
+              <div style="font-size:.78rem;font-weight:500;color:var(--vd);margin-bottom:.3rem">Como funciona</div>
+              <div style="font-size:.78rem;color:var(--cinza);line-height:1.6">Tire uma foto clara do caderno preenchido pelo aluno. Nossa IA analisa as anotações e gera recomendações personalizadas para a família.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ IA ADMIN ═══ -->
+    <div class="view" id="view-ia">
+      <div class="sec-title">Recomendações da IA</div>
+      <div class="sec-sub">Análises automáticas com base nos cadernos enviados esta semana</div>
+      <div class="ia-card">
+        <div class="ia-badge">Raimundo Nonato · Solo + Clima · Semana 9</div>
+        <div class="ia-title">Solo seco com sol forte — risco de estresse hídrico na mandioca</div>
+        <div class="ia-text">Solo com baixa umidade nos primeiros 10cm combinado a sol forte nos primeiros 3 dias da semana. A mandioca está em fase de tuberização (mês 4), período crítico para a formação das raízes. Irrigação leve antes das 8h por 2-3 dias reduz o risco de estresse hídrico e garante produtividade. Fonte: EMBRAPA Mandioca e Fruticultura.</div>
+        <div class="ia-actions">
+          <button class="ia-btn" onclick="showView('videos')">Ver vídeo: irrigação na Amazônia</button>
+          <button class="ia-btn" onclick="alert('Alerta enviado para Raimundo Nonato!')">Enviar alerta para produtor</button>
+        </div>
+      </div>
+      <div class="ia-card" style="background:linear-gradient(135deg,#1a3040 0%,#1a4535 100%)">
+        <div class="ia-badge" style="color:#7FC8E8">José Maria Pompeu · Cupuaçu · Semana 8</div>
+        <div class="ia-title">Florescimento do cupuaçu — janela de adubação foliar</div>
+        <div class="ia-text">Florescimento registrado indica alta demanda nutricional. Janela ideal para adubação foliar com boro (B) e zinco (Zn) — micronutrientes críticos para fixação dos frutos. Dose recomendada: 2g/L de ácido bórico + 1g/L de sulfato de zinco. Aplicar nas primeiras horas do dia. Fonte: EMBRAPA Amazônia Oriental.</div>
+        <div class="ia-actions">
+          <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="showView('videos')">Ver técnica de adubação foliar</button>
+          <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="alert('Plano gerado para José Maria Pompeu!')">Gerar plano de manejo</button>
+        </div>
+      </div>
+      <div class="ia-card" style="background:linear-gradient(135deg,#3D2010 0%,#5C3018 100%)">
+        <div class="ia-badge" style="color:var(--ouro)">Raimundo Nonato · Açaizeiro · Problema identificado</div>
+        <div class="ia-title">Amarelamento foliar no açaizeiro — possível deficiência de Mg</div>
+        <div class="ia-text">Amarelamento internerval nas folhas mais velhas é sintoma clássico de deficiência de magnésio (Mg), comum em latossolos amarelos da Amazônia com pH abaixo de 5,5. Recomendação: calagem com calcário dolomítico (2t/ha) e verificação do pH do solo — ideal entre 5,5 e 6,5. Fonte: EMBRAPA Amazônia Oriental / IAC.</div>
+        <div class="ia-actions">
+          <button class="ia-btn" style="border-color:rgba(200,137,58,.35);color:var(--ouro)" onclick="showView('videos')">Ver vídeo sobre açaizeiro</button>
+          <button class="ia-btn" style="border-color:rgba(200,137,58,.35);color:var(--ouro)" onclick="alert('Visita técnica agendada!')">Agendar visita técnica</button>
+        </div>
+      </div>
+      <div class="ia-card" style="background:linear-gradient(135deg,#1C3D22 0%,#2D5E35 100%)">
+        <div class="ia-badge">Faustino Alves · Dendê · Alerta de engajamento</div>
+        <div class="ia-title">Família sem registro há 3 semanas — visita prioritária</div>
+        <div class="ia-text">O sistema não recebeu registros da família Faustino Alves desde a semana 6. O dendezeiro está em fase de crescimento vegetativo (mês 5), período que exige monitoramento de pragas e fertilização. A ausência de registros pode indicar dificuldades no campo. Recomendação: visita presencial esta semana.</div>
+        <div class="ia-actions">
+          <button class="ia-btn" onclick="showView('novocaderno')">Registrar visita agora</button>
+          <button class="ia-btn" onclick="alert('Lembrete enviado ao gestor!')">Marcar visita no calendário</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VÍDEOS ═══ -->
+    <div class="view" id="view-videos">
+      <div class="sec-title">Vídeos Didáticos</div>
+      <div class="sec-sub">Conteúdo educativo Amazon People para a realidade amazônica</div>
+      <div class="grid-3">
+        <div class="video-card"><div class="video-thumb" style="background:#1a3d22"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Solo</span></div><div class="video-info"><div class="video-title">Identificando problemas no solo da Amazônia</div><div class="video-meta">8 min · Amazon People · EMBRAPA</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#2d5e35"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Irrigação</span></div><div class="video-info"><div class="video-title">Irrigação no período de seca — técnicas simples e baratas</div><div class="video-meta">5 min · Amazon People</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#3d4a1a"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Açaí</span></div><div class="video-info"><div class="video-title">Manejo do açaizeiro — nutrição e doenças comuns</div><div class="video-meta">12 min · Amazon People · EMBRAPA</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#3d2a10"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Cupuaçu</span></div><div class="video-info"><div class="video-title">Cupuaçu em florescimento — adubação foliar na prática</div><div class="video-meta">7 min · Amazon People</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#1a2040"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Dendê</span></div><div class="video-info"><div class="video-title">SAF Dendê — implantação e primeiros tratos</div><div class="video-meta">15 min · Amazon People · Natura</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#1a3a30"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">SAF</span></div><div class="video-info"><div class="video-title">O que é um Sistema Agroflorestal e por que funciona</div><div class="video-meta">10 min · Amazon People</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#2d3d10"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Mandioca</span></div><div class="video-info"><div class="video-title">Mandioca no SAF — plantio, tratos e colheita</div><div class="video-meta">9 min · Amazon People · EMBRAPA</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#3d1a1a"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Finanças</span></div><div class="video-info"><div class="video-title">Gestão financeira da propriedade familiar</div><div class="video-meta">11 min · Amazon People</div></div></div>
+        <div class="video-card"><div class="video-thumb" style="background:#1a2d3d"><div class="video-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="video-tag">Pragas</span></div><div class="video-info"><div class="video-title">Controle biológico de pragas na Amazônia</div><div class="video-meta">8 min · Amazon People · EMBRAPA</div></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ SEM FILHOS ═══ -->
+    <div class="view" id="view-sem-filhos">
+      <div class="sec-title">Produtores sem filhos em idade escolar</div>
+      <div class="sec-sub">Acesso direto via gestor — visita semanal sem dependência do caderno escolar</div>
+      <div class="alert alert-green" style="margin-bottom:1.5rem">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>Para esses produtores, o gestor Donato faz a visita semanal e registra os dados no sistema. As recomendações são entregues impressas ou via WhatsApp.</div>
+      </div>
+      <div class="family-row">
+        <div class="fam-avatar" style="background:rgba(200,137,58,.15);color:var(--ouro)">RA</div>
+        <div><div class="fam-name">Raimundo Nonato Gonçalves</div><div class="fam-meta">Produtor solo · 4.2 ha · Dendê, Açaí · Visita semanal</div></div>
+        <div class="fam-status"><span class="tag tag-amber" style="font-size:.68rem">Visita hoje</span><button class="btn btn-primary btn-sm" onclick="showView('novocaderno')">Registrar</button></div>
+      </div>
+      <div class="family-row">
+        <div class="fam-avatar" style="background:rgba(200,137,58,.15);color:var(--ouro)">MA</div>
+        <div><div class="fam-name">Marcelino Andrade</div><div class="fam-meta">Produtor solo · 2.8 ha · Cacau, Mandioca · Visita quinzenal</div></div>
+        <div class="fam-status"><span class="tag tag-green" style="font-size:.68rem">Em dia</span><button class="btn btn-ghost btn-sm" onclick="showFicha('marcelino')">Ver ficha</button></div>
+      </div>
+      <div class="family-row">
+        <div class="fam-avatar" style="background:rgba(200,137,58,.15);color:var(--ouro)">BE</div>
+        <div><div class="fam-name">Benedita Lemos</div><div class="fam-meta">Produtora · 1.5 ha · Açaí, Andiroba · Filhos adultos fora da vila</div></div>
+        <div class="fam-status"><span class="tag tag-green" style="font-size:.68rem">Em dia</span><button class="btn btn-ghost btn-sm" onclick="showFicha('benedita')">Ver ficha</button></div>
+      </div>
+      <div class="card" style="margin-top:1.5rem;border-left:3px solid var(--ouro)">
+        <div class="sec-title">Fluxo para produtores sem filhos</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:.5rem">
+          <div><div style="font-size:.75rem;font-weight:500;color:var(--ouro);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em">1. Visita semanal</div><div style="font-size:.82rem;color:var(--cinza);line-height:1.6">Donato visita, observa o campo e coleta informações diretamente com o produtor.</div></div>
+          <div><div style="font-size:.75rem;font-weight:500;color:var(--ouro);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em">2. Registro no sistema</div><div style="font-size:.82rem;color:var(--cinza);line-height:1.6">Dados inseridos no formulário padrão, ativando a análise da IA automaticamente.</div></div>
+          <div><div style="font-size:.75rem;font-weight:500;color:var(--ouro);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em">3. Entrega</div><div style="font-size:.82rem;color:var(--cinza);line-height:1.6">Recomendações impressas na próxima visita ou enviadas por WhatsApp.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RELATÓRIOS ═══ -->
+    <div class="view" id="view-relatorios">
+      <div class="sec-title">Relatórios</div>
+      <div class="sec-sub">Dados consolidados do programa · Vila Jutaí · 2025</div>
+      <div class="grid-2" style="margin-bottom:1.5rem">
+        <div class="card">
+          <div class="sec-title">Progresso do Programa</div>
+          <table style="width:100%;font-size:.85rem;border-collapse:collapse">
+            <tr style="border-bottom:1px solid rgba(45,94,53,.08)"><td style="color:var(--cinza);padding:.5rem 0">Famílias ativas</td><td style="font-weight:500">18 de 31 (meta 25/26)</td></tr>
+            <tr style="border-bottom:1px solid rgba(45,94,53,.08)"><td style="color:var(--cinza);padding:.5rem 0">Hectares em SAF</td><td style="font-weight:500">245 ha implantados</td></tr>
+            <tr style="border-bottom:1px solid rgba(45,94,53,.08)"><td style="color:var(--cinza);padding:.5rem 0">Árvores plantadas</td><td style="font-weight:500">47.495 (dendê + gliricídias)</td></tr>
+            <tr style="border-bottom:1px solid rgba(45,94,53,.08)"><td style="color:var(--cinza);padding:.5rem 0">Cadernos esta semana</td><td style="font-weight:500">14 de 18 (78%)</td></tr>
+            <tr><td style="color:var(--cinza);padding:.5rem 0">Alertas da IA ativos</td><td style="font-weight:500;color:var(--ouro)">5 pendentes</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <div class="sec-title">Renda Estimada por Família (10 ha)</div>
+          <table style="width:100%;font-size:.82rem;border-collapse:collapse">
+            <tr style="background:rgba(45,94,53,.05)"><td style="padding:.4rem .6rem;color:var(--cinza)">Ano 1–4</td><td style="padding:.4rem .6rem;font-weight:500">R$ 0</td><td style="padding:.4rem .6rem;font-size:.72rem;color:var(--cinza)">+ ciclo curto</td></tr>
+            <tr><td style="padding:.4rem .6rem;color:var(--cinza)">Ano 5</td><td style="padding:.4rem .6rem;font-weight:500">R$ 1.549/mês</td><td style="padding:.4rem .6rem;font-size:.72rem;color:var(--vf)">início colheita</td></tr>
+            <tr style="background:rgba(45,94,53,.05)"><td style="padding:.4rem .6rem;color:var(--cinza)">Ano 8</td><td style="padding:.4rem .6rem;font-weight:500">R$ 5.421/mês</td><td></td></tr>
+            <tr><td style="padding:.4rem .6rem;color:var(--cinza)">Ano 10</td><td style="padding:.4rem .6rem;font-weight:500">R$ 9.198/mês</td><td></td></tr>
+            <tr style="background:rgba(74,140,85,.08)"><td style="padding:.4rem .6rem;color:var(--vd);font-weight:600">Ano 12+</td><td style="padding:.4rem .6rem;font-weight:700;color:var(--vd)">R$ 21.295/mês</td><td style="padding:.4rem .6rem;font-size:.72rem;color:var(--vf)">independente</td></tr>
+          </table>
+          <div style="font-size:.7rem;color:var(--cinza);margin-top:.6rem">Fonte: Amazon People / BASA / CONAB 2024</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAINEL PRODUTOR — HOME ═══ -->
+    <div class="view" id="view-prod-home">
+      <div class="prod-hero" id="prod-hero">
+        <div class="prod-hero-nome" id="prod-hero-nome">—</div>
+        <div class="prod-hero-sub" id="prod-hero-sub">—</div>
+        <div class="prod-status-grid" id="prod-stats-grid"></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="sec-title">Minha Propriedade</div>
+          <table style="width:100%;font-size:.85rem;border-collapse:collapse" id="prod-dados-table"></table>
+        </div>
+        <div class="card">
+          <div class="sec-title">Última Recomendação da IA</div>
+          <div id="prod-ultima-ia"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PRODUTOR — IA ═══ -->
+    <div class="view" id="view-prod-ia">
+      <div class="sec-title">Recomendações da IA para sua propriedade</div>
+      <div class="sec-sub" id="prod-ia-sub">Análises baseadas no seu último caderno enviado</div>
+      <div id="prod-ia-cards"></div>
+    </div>
+
+    <!-- ═══ PRODUTOR — CADERNO ═══ -->
+    <div class="view" id="view-prod-caderno">
+      <div class="sec-title">Meu Caderno de Campo</div>
+      <div class="sec-sub">Histórico dos seus registros semanais</div>
+      <div id="prod-caderno-historico"></div>
+    </div>
+
+    <!-- ═══ PRODUTOR — ENVIAR FOTO ═══ -->
+    <div class="view" id="view-prod-enviar">
+      <div class="sec-title">Enviar Foto do Caderno</div>
+      <div class="sec-sub">Tire uma foto do caderno preenchido e envie para a IA analisar</div>
+      <div class="grid-2" style="align-items:start">
+        <div class="card">
+          <div class="upload-zone" onclick="document.getElementById('file-prod').click()">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="#4A8C55" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div class="upload-text">Toque aqui para tirar foto ou escolher da galeria</div>
+            <div class="upload-sub">JPG, PNG · A câmera do celular funciona</div>
+          </div>
+          <input type="file" id="file-prod" accept="image/*" style="display:none" onchange="previewFotoProd(this)"/>
+          <div class="foto-preview" id="foto-preview-prod">
+            <img id="foto-preview-img-prod" src="" alt=""/>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:.8rem">
+            <button class="btn btn-primary" style="flex:1" onclick="enviarFotoProd()">Enviar para a IA analisar</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:1rem">
+            <div class="sec-title">Como funciona</div>
+            <div style="font-size:.85rem;color:var(--cinza);line-height:1.7">
+              <p style="margin-bottom:.8rem">1. <strong>Preencha</strong> o caderno de campo com as informações da semana</p>
+              <p style="margin-bottom:.8rem">2. <strong>Tire uma foto</strong> clara das páginas preenchidas</p>
+              <p style="margin-bottom:.8rem">3. <strong>Envie aqui</strong> — nossa IA lê as anotações automaticamente</p>
+              <p>4. <strong>Receba</strong> recomendações personalizadas para sua plantação em até 24h</p>
+            </div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--vl)">
+            <div style="font-size:.78rem;font-weight:500;color:var(--vd);margin-bottom:.5rem">Dicas para uma boa foto</div>
+            <div style="font-size:.78rem;color:var(--cinza);line-height:1.65">
+              ✓ Foto em local bem iluminado<br/>
+              ✓ Caderno aberto e plano<br/>
+              ✓ Texto legível e sem sombras<br/>
+              ✓ Uma página por vez se possível
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<!-- MODAL NOVA FAMÍLIA -->
+<div class="modal-wrap" id="modal-nova-familia">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Cadastrar Nova Família</span>
+      <button class="modal-close" onclick="closeModal('modal-nova-familia')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Nome do responsável</label><input class="form-input" type="text" placeholder="Ex: José da Silva"/></div>
+        <div class="form-group"><label class="form-label">Nome da família / identificação</label><input class="form-input" type="text" placeholder="Ex: Família Silva"/></div>
+        <div class="form-group"><label class="form-label">Número de membros</label><input class="form-input" type="number" min="1" placeholder="5"/></div>
+        <div class="form-group">
+          <label class="form-label">Filhos em idade escolar?</label>
+          <select class="form-input form-select"><option>Sim — com filhos na escola</option><option>Não — produtor direto</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Área total (hectares)</label><input class="form-input" type="number" step="0.1" placeholder="3.5"/></div>
+        <div class="form-group"><label class="form-label">Localização / Ramal</label><input class="form-input" type="text" placeholder="Ramal do Açaí, km 3"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Culturas principais</label><input class="form-input" type="text" placeholder="Ex: Mandioca, Açaí, Cupuaçu, Dendê"/></div>
+      <div class="form-group">
+        <label class="form-label">Tipo de solo</label>
+        <select class="form-input form-select"><option>Latossolo amarelo</option><option>Argissolo vermelho-amarelo</option><option>Terra preta de índio</option><option>Gleissolo (várzea)</option><option>Não identificado</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Acesso à água / irrigação</label>
+        <select class="form-input form-select"><option>Igarapé próximo</option><option>Poço artesiano</option><option>Sem irrigação</option><option>Chuva apenas</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Desafio principal identificado</label><textarea class="form-input" style="min-height:70px" placeholder="Ex: Compactação do solo, pragas, falta de insumos..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-nova-familia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="cadastrarFamilia()">Cadastrar Família</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ BANCO DE DADOS FICTÍCIO ═══
+const DB = {
+  familias: [
+    { id:'raimundo', sigla:'RN', nome:'Raimundo Nonato Gonçalves', responsavel:'Raimundo Nonato Gonçalves', filhos:2, ha:4.2, culturas:'Dendê, Açaí, Mandioca', solo:'Latossolo amarelo', agua:'Igarapé próximo', semana:9, status:'ativo', engajamento:92, localizacao:'Ramal Principal, km 2', desafio:'Amarelamento no açaizeiro', treinamento:'Amazon People — Ciclo 1', membros:5 },
+    { id:'pompeu', sigla:'JP', nome:'José Maria Pompeu', responsavel:'José Maria Pompeu', filhos:3, ha:3.8, culturas:'Cupuaçu, Cacau, Dendê', solo:'Argissolo vermelho-amarelo', agua:'Igarapé próximo', semana:8, status:'ativo', engajamento:78, localizacao:'Ramal do Açaí, km 4', desafio:'Florescimento cupuaçu — adubação', treinamento:'Amazon People — Ciclo 1', membros:6 },
+    { id:'manoel', sigla:'MM', nome:'Manoel Maria Gonçalves', responsavel:'Manoel Maria Gonçalves', filhos:1, ha:5.0, culturas:'Dendê, Andiroba, Banana', solo:'Latossolo amarelo', agua:'Poço artesiano', semana:6, status:'regular', engajamento:55, localizacao:'Ramal do Cumaru, km 6', desafio:'Adaptação ao SAF', treinamento:'Amazon People — Ciclo 1', membros:4 },
+    { id:'faustino', sigla:'FA', nome:'Faustino Alves', responsavel:'Faustino Alves', filhos:2, ha:3.5, culturas:'Dendê, Mandioca, Abacaxi', solo:'Latossolo amarelo', agua:'Chuva apenas', semana:2, status:'atencao', engajamento:22, localizacao:'Ramal da Castanha, km 8', desafio:'Engajamento baixo — 3 semanas sem registro', treinamento:'Amazon People — Ciclo 1', membros:5 },
+    { id:'ocelio', sigla:'OC', nome:'Océlio Gaia do Carmo', responsavel:'Océlio Gaia do Carmo', filhos:0, ha:4.8, culturas:'Dendê, Açaí, Andiroba', solo:'Terra preta de índio', agua:'Igarapé próximo', semana:9, status:'ativo', engajamento:88, localizacao:'Ramal Principal, km 5', desafio:'Nenhum no momento', treinamento:'Amazon People — Ciclo 1', membros:3 },
+    { id:'maria', sigla:'MS', nome:'Maria dos Santos Ferreira', responsavel:'Maria dos Santos Ferreira', filhos:4, ha:2.5, culturas:'Açaí, Cacau, Cupuaçu', solo:'Argissolo vermelho-amarelo', agua:'Igarapé próximo', semana:9, status:'ativo', engajamento:85, localizacao:'Ramal do Açaí, km 2', desafio:'Pragas no cacaueiro', treinamento:'Amazon People — Ciclo 1', membros:7 },
+    { id:'antonio', sigla:'AL', nome:'Antonio Lemos da Silva', responsavel:'Antonio Lemos da Silva', filhos:2, ha:3.1, culturas:'Dendê, Mandioca, Banana', solo:'Latossolo amarelo', agua:'Chuva apenas', semana:7, status:'ativo', engajamento:70, localizacao:'Ramal do Cumaru, km 3', desafio:'Solo compactado', treinamento:'Amazon People — Ciclo 1', membros:5 },
+    { id:'marcelino', sigla:'MA', nome:'Marcelino Andrade', responsavel:'Marcelino Andrade', filhos:0, ha:2.8, culturas:'Cacau, Mandioca, Abóbora', solo:'Argissolo vermelho-amarelo', agua:'Poço artesiano', semana:8, status:'ativo', engajamento:75, localizacao:'Ramal Principal, km 7', desafio:'Gestão financeira', treinamento:'Amazon People — Ciclo 1', membros:2 },
+    { id:'benedita', sigla:'BE', nome:'Benedita Lemos', responsavel:'Benedita Lemos', filhos:0, ha:1.5, culturas:'Açaí, Andiroba', solo:'Terra preta de índio', agua:'Igarapé próximo', semana:9, status:'ativo', engajamento:90, localizacao:'Ramal do Açaí, km 1', desafio:'Colheita do açaí', treinamento:'Amazon People — Ciclo 1', membros:1 },
+  ],
+  produtores: [
+    { id:'raimundo', login:'raimundo', nome:'Raimundo Nonato Gonçalves', sigla:'RN' },
+    { id:'pompeu', login:'pompeu', nome:'José Maria Pompeu', sigla:'JP' },
+    { id:'ocelio', login:'ocelio', nome:'Océlio Gaia do Carmo', sigla:'OC' },
+    { id:'maria', login:'maria', nome:'Maria dos Santos Ferreira', sigla:'MS' },
+  ]
+};
+
+// ═══ ESTADO ═══
+let perfil = 'admin';
+let produtorAtual = null;
+let fichaAtual = null;
+
+// ═══ LOGIN ═══
+function selectPerfil(p) {
+  perfil = p;
+  document.getElementById('card-admin').classList.toggle('selected', p==='admin');
+  document.getElementById('card-produtor').classList.toggle('selected', p==='produtor');
+  const sel = document.getElementById('login-user-select');
+  sel.innerHTML = '';
+  if(p === 'admin') {
+    sel.innerHTML = `<option value="donato">Donato Silva — Gestor · Vila Jutaí</option><option value="marcelo">Marcelo Heinen — Coordenador de Campo</option>`;
+  } else {
+    DB.produtores.forEach(pr => {
+      sel.innerHTML += `<option value="${pr.id}">${pr.nome}</option>`;
+    });
+  }
+}
+
+function fazerLogin() {
+  const sel = document.getElementById('login-user-select');
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  if(perfil === 'admin') {
+    document.getElementById('sidebar-admin').style.display = 'flex';
+    document.getElementById('sidebar-produtor').style.display = 'none';
+    document.getElementById('btn-nova-familia').style.display = '';
+    const isD = sel.value === 'donato';
+    document.getElementById('sb-avatar-txt').textContent = isD ? 'DO' : 'MH';
+    document.getElementById('sb-name-txt').textContent = isD ? 'Donato Silva' : 'Marcelo Heinen';
+    document.getElementById('sb-role-txt').textContent = isD ? 'Gestor · Vila Jutaí' : 'Coord. de Campo';
+    renderListaFamilias();
+    renderCardsCaderno();
+    showView('dashboard');
+  } else {
+    produtorAtual = DB.familias.find(f => f.id === sel.value);
+    if(!produtorAtual) produtorAtual = DB.familias[0];
+    document.getElementById('sidebar-admin').style.display = 'none';
+    document.getElementById('sidebar-produtor').style.display = 'flex';
+    document.getElementById('btn-nova-familia').style.display = 'none';
+    document.getElementById('sb-prod-avatar').textContent = produtorAtual.sigla;
+    document.getElementById('sb-prod-name').textContent = produtorAtual.nome.split(' ').slice(0,2).join(' ');
+    renderProdHome();
+    renderProdIA();
+    renderProdCaderno();
+    showView('prod-home');
+  }
+}
+
+function voltarLogin() {
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+}
+
+// ═══ LISTA FAMÍLIAS ═══
+function renderListaFamilias() {
+  const cont = document.getElementById('lista-familias');
+  cont.innerHTML = '';
+  DB.familias.forEach(f => {
+    const statusLabel = f.status==='ativo' ? 'Ativo' : f.status==='regular' ? 'Regular' : 'Atenção';
+    const statusClass = f.status==='ativo' ? 'tag-green' : f.status==='regular' ? 'tag-blue' : 'tag-amber';
+    const dotClass = f.status==='ativo' ? 'dot-green' : f.status==='regular' ? 'dot-gray' : 'dot-amber';
+    const filhosTxt = f.filhos > 0 ? `${f.filhos} filhos em idade escolar` : 'Produtor direto';
+    cont.innerHTML += `
+      <div class="family-row" onclick="showFicha('${f.id}')">
+        <div class="fam-avatar">${f.sigla}</div>
+        <div>
+          <div class="fam-name">${f.nome}</div>
+          <div class="fam-meta">${filhosTxt} · ${f.ha} ha · ${f.culturas.split(',')[0]}</div>
+        </div>
+        <div class="fam-status">
+          <span class="tag ${statusClass}" style="font-size:.68rem">${statusLabel}</span>
+          <div class="dot ${dotClass}"></div>
+        </div>
+      </div>`;
+  });
+}
+
+// ═══ FICHA FAMÍLIA ═══
+function showFicha(id) {
+  fichaAtual = DB.familias.find(f => f.id === id);
+  if(!fichaAtual) return;
+  const f = fichaAtual;
+  document.getElementById('ficha-nome').textContent = f.nome;
+  document.getElementById('ficha-sub').textContent = f.responsavel + ' · Responsável';
+  document.getElementById('ficha-semana').textContent = String(f.semana).padStart(2,'0');
+  const tagsEl = document.getElementById('ficha-tags');
+  tagsEl.innerHTML = [f.ha + ' hectares', f.culturas.split(',')[0].trim(), f.agua, f.solo.split(' ')[0]].map(t => `<span class="ficha-tag">${t}</span>`).join('');
+
+  // Tab dados
+  document.getElementById('tab-dados').innerHTML = `
+    <div class="grid-2">
+      <div class="card">
+        <div class="sec-title">Dados da Família</div>
+        <table style="width:100%;font-size:.85rem;border-collapse:collapse">
+          <tr><td style="color:var(--cinza);padding:.4rem 0;width:140px">Responsável</td><td style="font-weight:500">${f.responsavel}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Membros</td><td>${f.membros} pessoas</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Filhos na escola</td><td>${f.filhos > 0 ? f.filhos + ' filhos (Ens. Fundamental)' : 'Não tem filhos escolares'}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Localização</td><td>${f.localizacao}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Treinamentos</td><td>${f.treinamento}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Engajamento</td><td><span style="font-weight:600;color:${f.engajamento>70?'var(--vf)':'var(--ouro)'}">${f.engajamento}%</span></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="sec-title">Dados da Propriedade</div>
+        <table style="width:100%;font-size:.85rem;border-collapse:collapse">
+          <tr><td style="color:var(--cinza);padding:.4rem 0;width:140px">Área total</td><td style="font-weight:500">${f.ha} hectares</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Culturas</td><td>${f.culturas}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Tipo de solo</td><td>${f.solo}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Água / irrigação</td><td>${f.agua}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Desafio atual</td><td>${f.desafio}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Semana atual</td><td>Semana ${f.semana} de 24</td></tr>
+        </table>
+      </div>
+    </div>`;
+
+  // Tab caderno
+  document.getElementById('tab-caderno').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <div class="sec-title" style="margin-bottom:0">Histórico do Caderno</div>
+      <button class="btn btn-primary btn-sm" onclick="showView('novocaderno')">+ Novo Registro</button>
+    </div>
+    <div class="caderno-week">
+      <div class="caderno-week-header" onclick="toggleWeek(this)">
+        <span class="week-label">Semana ${f.semana} — Atual</span>
+        <div style="display:flex;align-items:center;gap:.8rem">
+          <span class="week-date">12/05/2025</span>
+          <span class="tag tag-green" style="font-size:.68rem">Enviado</span>
+          <span>▾</span>
+        </div>
+      </div>
+      <div class="caderno-week-body">
+        <div class="obs-grid">
+          <div class="obs-item"><div class="obs-label">Condição do Solo</div><div class="obs-value">${f.solo.includes('amarelo') ? 'Solo seco na área do dendê. Baixa umidade nos primeiros 10cm.' : 'Boa umidade. Solo em condições ideais.'}</div></div>
+          <div class="obs-item"><div class="obs-label">Clima da Semana</div><div class="obs-value">Sol forte segunda e terça. Chuva fraca quinta-feira à tarde.</div></div>
+          <div class="obs-item"><div class="obs-label">Atividades Realizadas</div><div class="obs-value">Capina manual nas entrelinhas. Adubação de cobertura em 1.0 ha.</div></div>
+          <div class="obs-item"><div class="obs-label">Observações / Dúvidas</div><div class="obs-value">${f.desafio}. Consultou caderno módulo 2.</div></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;align-items:center;gap:.8rem">
+          <div class="foto-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A8C55" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+          <span style="font-size:.78rem;color:var(--cinza)">1 foto do caderno enviada</span>
+        </div>
+      </div>
+    </div>
+    <div class="caderno-week">
+      <div class="caderno-week-header" onclick="toggleWeek(this)">
+        <span class="week-label">Semana ${f.semana-1}</span>
+        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">05/05/2025</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▸</span></div>
+      </div>
+      <div class="caderno-week-body" style="display:none">
+        <div class="obs-grid">
+          <div class="obs-item"><div class="obs-label">Condição do Solo</div><div class="obs-value">Boa umidade após chuvas.</div></div>
+          <div class="obs-item"><div class="obs-label">Clima</div><div class="obs-value">Chuvas regulares na semana.</div></div>
+          <div class="obs-item"><div class="obs-label">Atividades</div><div class="obs-value">Roçagem e aplicação de composto orgânico.</div></div>
+          <div class="obs-item"><div class="obs-label">Dúvidas</div><div class="obs-value">Como calcular o espaçamento para o cacau?</div></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Tab IA
+  document.getElementById('tab-ia').innerHTML = `
+    <div class="ia-card">
+      <div class="ia-badge">IA · Análise automática · Semana ${f.semana}</div>
+      <div class="ia-title">${f.desafio} — análise e recomendação</div>
+      <div class="ia-text">Com base nos dados registrados na semana ${f.semana}, identificamos: ${f.desafio.toLowerCase()}. Para o contexto de ${f.solo} e culturas de ${f.culturas.split(',')[0]}, a recomendação é monitoramento semanal e aplicação preventiva conforme orientação técnica da EMBRAPA Amazônia Oriental. A ausência de intervenção pode reduzir a produtividade estimada em até 30%.</div>
+      <div class="ia-actions">
+        <button class="ia-btn" onclick="showView('videos')">Ver vídeo relacionado</button>
+        <button class="ia-btn" onclick="alert('Plano gerado para ${f.nome}!')">Gerar plano semanal</button>
+        <button class="ia-btn" onclick="alert('Marcado como resolvido!')">Marcar como resolvido</button>
+      </div>
+    </div>`;
+
+  switchTab(document.querySelector('.tab.active'), 'tab-dados');
+  showView('ficha');
+}
+
+// ═══ CARDS CADERNO ═══
+function renderCardsCaderno() {
+  const cont = document.getElementById('cards-caderno');
+  if(!cont) return;
+  cont.innerHTML = '';
+  DB.familias.slice(0,6).forEach(f => {
+    const enviado = f.semana >= 8;
+    const cor = enviado ? 'var(--vf)' : 'var(--ouro)';
+    cont.innerHTML += `
+      <div class="card" style="border-top:3px solid ${cor}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem">
+          <div><div style="font-weight:500;font-size:.9rem">${f.nome.split(' ').slice(0,2).join(' ')}</div><div style="font-size:.75rem;color:var(--cinza)">${enviado?'Enviado · '+f.semana+'/5':'Pendente · sem. '+f.semana}</div></div>
+          <span class="dot ${enviado?'dot-green':'dot-amber'}"></span>
+        </div>
+        <div style="font-size:.82rem;color:var(--cinza);line-height:1.6">${f.desafio} · ${f.ha}ha</div>
+        <div style="margin-top:1rem;display:flex;gap:.6rem">
+          <button class="btn btn-ghost btn-sm" onclick="showFicha('${f.id}')">Ver ficha</button>
+          <button class="btn btn-primary btn-sm" onclick="showView('ia')">Analisar IA</button>
+        </div>
+      </div>`;
+  });
+}
+
+// ═══ PAINEL PRODUTOR ═══
+function renderProdHome() {
+  const f = produtorAtual;
+  document.getElementById('prod-hero-nome').textContent = f.nome;
+  document.getElementById('prod-hero-sub').textContent = f.localizacao + ' · ' + f.ha + ' ha · ' + f.culturas;
+  document.getElementById('prod-stats-grid').innerHTML = `
+    <div class="prod-stat"><div class="prod-stat-num">${f.semana}</div><div class="prod-stat-lbl">Semana atual</div></div>
+    <div class="prod-stat"><div class="prod-stat-num">${f.ha}</div><div class="prod-stat-lbl">Hectares</div></div>
+    <div class="prod-stat"><div class="prod-stat-num">${f.engajamento}%</div><div class="prod-stat-lbl">Engajamento</div></div>
+    <div class="prod-stat"><div class="prod-stat-num">3</div><div class="prod-stat-lbl">Alertas IA</div></div>`;
+  document.getElementById('prod-dados-table').innerHTML = `
+    <tr><td style="color:var(--cinza);padding:.4rem 0;width:130px">Responsável</td><td style="font-weight:500">${f.responsavel}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Área total</td><td>${f.ha} hectares</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Culturas</td><td>${f.culturas}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Solo</td><td>${f.solo}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Localização</td><td>${f.localizacao}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Treinamento</td><td>${f.treinamento}</td></tr>`;
+  document.getElementById('prod-ultima-ia').innerHTML = `
+    <div class="ia-card" style="margin:0">
+      <div class="ia-badge">IA · Semana ${f.semana}</div>
+      <div class="ia-title">${f.desafio}</div>
+      <div class="ia-text" style="font-size:.8rem">Análise baseada no seu último caderno enviado. Clique em Recomendações da IA para ver o detalhe completo.</div>
+      <div class="ia-actions"><button class="ia-btn" onclick="showView('prod-ia')">Ver recomendações completas</button></div>
+    </div>`;
+}
+
+function renderProdIA() {
+  const f = produtorAtual;
+  document.getElementById('prod-ia-sub').textContent = 'Análises para ' + f.nome + ' · Semana ' + f.semana;
+  document.getElementById('prod-ia-cards').innerHTML = `
+    <div class="ia-card">
+      <div class="ia-badge">IA · Análise do seu caderno · Semana ${f.semana}</div>
+      <div class="ia-title">${f.desafio} — o que fazer</div>
+      <div class="ia-text">Com base no que você registrou no caderno essa semana, identificamos: ${f.desafio.toLowerCase()}. Para o tipo de solo ${f.solo} e suas culturas de ${f.culturas.split(',')[0]}, a recomendação é: monitoramento semanal e intervenção conforme orientação técnica. Fonte: EMBRAPA Amazônia Oriental.</div>
+      <div class="ia-actions">
+        <button class="ia-btn" onclick="showView('videos')">Ver vídeo explicativo</button>
+        <button class="ia-btn" onclick="alert('Donato foi notificado!')">Chamar o gestor</button>
+      </div>
+    </div>
+    <div class="ia-card" style="background:linear-gradient(135deg,#1a3040 0%,#1a4535 100%)">
+      <div class="ia-badge" style="color:#7FC8E8">IA · Dica da semana</div>
+      <div class="ia-title">Como cuidar do seu ${f.culturas.split(',')[0].trim()} nessa época do ano</div>
+      <div class="ia-text">No período de ${new Date().getMonth()<6?'chuvas':'seca'}, o ${f.culturas.split(',')[0].trim()} precisa de atenção especial. Verifique as folhas semanalmente e registre qualquer alteração no caderno. O Donato vai analisar seus registros e trazer orientações personalizadas na próxima visita.</div>
+      <div class="ia-actions">
+        <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="showView('videos')">Ver vídeo sobre ${f.culturas.split(',')[0].trim()}</button>
+      </div>
+    </div>`;
+}
+
+function renderProdCaderno() {
+  const f = produtorAtual;
+  document.getElementById('prod-caderno-historico').innerHTML = `
+    <div class="caderno-week">
+      <div class="caderno-week-header" onclick="toggleWeek(this)">
+        <span class="week-label">Semana ${f.semana} — Atual</span>
+        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">12/05/2025</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▾</span></div>
+      </div>
+      <div class="caderno-week-body">
+        <div class="obs-grid">
+          <div class="obs-item"><div class="obs-label">Condição do Solo</div><div class="obs-value">Solo seco na área principal. Baixa umidade.</div></div>
+          <div class="obs-item"><div class="obs-label">Clima</div><div class="obs-value">Sol forte. Chuva leve na quinta-feira.</div></div>
+          <div class="obs-item"><div class="obs-label">Atividades</div><div class="obs-value">Capina e adubação de cobertura em 1ha.</div></div>
+          <div class="obs-item"><div class="obs-label">Dúvidas</div><div class="obs-value">${f.desafio}</div></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;align-items:center;gap:.8rem">
+          <div class="foto-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A8C55" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+          <span style="font-size:.78rem;color:var(--cinza)">1 foto enviada</span>
+        </div>
+      </div>
+    </div>
+    <div class="caderno-week">
+      <div class="caderno-week-header" onclick="toggleWeek(this)">
+        <span class="week-label">Semana ${f.semana-1}</span>
+        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">05/05/2025</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▸</span></div>
+      </div>
+      <div class="caderno-week-body" style="display:none">
+        <div class="obs-grid">
+          <div class="obs-item"><div class="obs-label">Solo</div><div class="obs-value">Boa umidade após chuvas.</div></div>
+          <div class="obs-item"><div class="obs-label">Clima</div><div class="obs-value">Semana chuvosa.</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem">
+      <button class="btn btn-primary" onclick="showView('prod-enviar')">+ Enviar novo registro</button>
+    </div>`;
+}
+
+// ═══ FUNÇÕES GERAIS ═══
+const titles = {
+  dashboard:'Dashboard',familias:'Famílias',ficha:'Ficha da Família',
+  caderno:'Cadernos de Campo',novocaderno:'Novo Registro',
+  ia:'Recomendações IA',videos:'Vídeos Didáticos','sem-filhos':'Produtores sem Filhos',
+  relatorios:'Relatórios',
+  'prod-home':'Minha Propriedade','prod-ia':'Recomendações da IA',
+  'prod-caderno':'Meu Caderno','prod-enviar':'Enviar Foto do Caderno'
+};
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const el = document.getElementById('view-'+id);
+  if(el) el.classList.add('active');
+  const btn = document.querySelector(`.sb-item[onclick*="'${id}'"]`);
+  if(btn) btn.classList.add('active');
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+  window.scrollTo(0,0);
+}
+
+function switchTab(btn, tabId) {
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['tab-dados','tab-caderno','tab-ia'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = id===tabId ? 'block' : 'none';
+  });
+}
+
+function toggleWeek(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('span:last-child');
+  const showing = body.style.display !== 'none';
+  body.style.display = showing ? 'none' : 'block';
+  if(arrow) arrow.textContent = showing ? '▸' : '▾';
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-wrap').forEach(m => {
+  m.addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
+});
+
+function cadastrarFamilia() {
+  closeModal('modal-nova-familia');
+  alert('Família cadastrada com sucesso! Será exibida na lista em breve.');
+}
+
+function salvarRegistro() {
+  alert('Registro salvo! A IA analisará os dados e gerará recomendações em breve.');
+  showView('ia');
+}
+
+function previewFoto(input) {
+  if(input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('foto-preview-img-admin').src = e.target.result;
+      document.getElementById('foto-preview-admin').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function previewFotoProd(input) {
+  if(input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('foto-preview-img-prod').src = e.target.result;
+      document.getElementById('foto-preview-prod').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function enviarFotoProd() {
+  const img = document.getElementById('foto-preview-img-prod').src;
+  if(!img || img === window.location.href) {
+    alert('Selecione uma foto do caderno antes de enviar.');
+    return;
+  }
+  alert('Foto enviada com sucesso! Nossa IA está analisando seu caderno. Você receberá as recomendações em breve.');
+  showView('prod-ia');
+}
+</script>
+</body>
+</html>
