@@ -6,6 +6,8 @@ Plataforma de gestão de famílias e produção agrícola da comunidade de Jutai
 
 - `plataformanexus.html`: frontend protótipo (admin e produtor).
 - `backend/`: API de autenticação real (Express + JSON local + JWT em cookie HttpOnly).
+- `api/ia.mjs`: função Edge para recomendações com IA (pronta para Vercel).
+- `vercel.json`: rota `/` apontando para `plataformanexus.html`.
 
 ## Como rodar (modo simples)
 
@@ -74,3 +76,29 @@ API: `http://localhost:3333`
 - Recomendado para monorepo:
   - projeto frontend com Root Directory `.`
   - projeto backend com Root Directory `backend`
+
+## IA Edge (novo)
+
+A área "Recomendações da IA" do produtor agora consegue chamar uma função Edge:
+
+- endpoint padrão em produção: `/api/ia`
+- endpoint padrão local: `http://localhost:3000/api/ia`
+
+### Variáveis de ambiente (Vercel)
+
+- `OPENAI_API_KEY` (obrigatória para IA real)
+- `OPENAI_MODEL` (opcional, padrão: `gpt-4o-mini`)
+
+Se `OPENAI_API_KEY` não estiver definida, a função retorna uma recomendação de contingência (fallback) para não travar o app.
+
+### Teste local da Edge Function
+
+No diretório raiz do projeto:
+
+```bash
+vercel dev
+```
+
+Abra:
+
+- `http://localhost:3000`

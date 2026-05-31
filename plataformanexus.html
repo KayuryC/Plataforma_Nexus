@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="nexus-api-base" content="__AUTO__"/>
 <meta name="nexus-auth-mode" content="local"/>
+<meta name="nexus-ai-endpoint" content="__AUTO__"/>
 <title>Nexus — Plataforma</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -195,6 +196,8 @@ textarea.form-input{resize:vertical;min-height:90px}
 .ia-actions{display:flex;gap:.7rem;margin-top:1rem;flex-wrap:wrap}
 .ia-btn{font-size:.72rem;padding:.4rem .9rem;border-radius:3px;border:1px solid rgba(123,184,104,.35);color:var(--vl);background:transparent;transition:background .2s}
 .ia-btn:hover{background:rgba(123,184,104,.15)}
+.ia-btn:disabled{opacity:.7;cursor:not-allowed}
+.ia-edge-note{margin-top:.8rem;font-size:.72rem;color:rgba(184,217,164,.65)}
 .video-card{background:var(--branco);border:1px solid rgba(45,94,53,.1);border-radius:6px;overflow:hidden;transition:transform .2s,border-color .2s}
 .video-card:hover{transform:translateY(-2px);border-color:rgba(74,140,85,.3)}
 .video-thumb{height:110px;background:var(--vm);display:flex;align-items:center;justify-content:center;position:relative}
@@ -261,13 +264,114 @@ textarea.form-input{resize:vertical;min-height:90px}
 .foto-preview{border-radius:6px;overflow:hidden;border:2px solid rgba(74,140,85,.3);margin-top:.8rem;display:none}
 .foto-preview img{width:100%;display:block}
 
+@media(max-width:1200px){
+  .grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
 @media(max-width:900px){
-  .sidebar{width:60px;min-width:60px}
-  .sb-logo,.sb-section,.sb-name,.sb-role,.sb-badge,.sb-item span{display:none}
-  .sb-item{padding:.65rem;justify-content:center}
-  .main{margin-left:60px}
-  .grid-2,.grid-3,.grid-4,.prod-status-grid{grid-template-columns:1fr}
-  .obs-grid{grid-template-columns:1fr}
+  #login-screen{padding:1rem}
+  .login-box{padding:1.7rem 1.2rem;width:min(560px,100%);border-radius:10px}
+  .login-sub{letter-spacing:.14em;margin-bottom:1.7rem}
+  .perfil-cards{grid-template-columns:1fr;gap:.7rem;margin-bottom:1.4rem}
+  .perfil-card{padding:1rem}
+
+  .sidebar{width:64px;min-width:64px}
+  .sb-logo,.sb-section,.sb-name,.sb-role,.sb-badge,.sb-item span,.notif{display:none}
+  .sb-item{padding:.75rem;justify-content:center}
+  .sb-profile{justify-content:center;padding:.8rem .4rem}
+  .sb-logout{padding:.7rem .5rem;justify-content:center}
+  .sb-logout span{display:none}
+
+  .main{margin-left:64px}
+  .topbar{padding:.8rem 1rem;flex-wrap:wrap;gap:.6rem}
+  .topbar-title{font-size:1rem}
+  .topbar-right{width:100%;justify-content:flex-start;flex-wrap:wrap;gap:.45rem}
+  .content{padding:1rem}
+
+  .grid-2,.obs-grid{grid-template-columns:1fr}
+  .prod-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tabs{overflow-x:auto;white-space:nowrap}
+  .tab{padding:.65rem .9rem;flex:0 0 auto}
+  .ficha-header{padding:1.2rem}
+  .family-row{padding:.85rem;gap:.7rem}
+  .fam-status{gap:.45rem}
+  .upload-zone{padding:1.3rem}
+  .modal{width:min(560px,96vw)}
+  .modal-body,.modal-header,.modal-footer{padding:1rem}
+  .toast-wrap{right:12px;left:12px;bottom:12px}
+  .toast{min-width:0;max-width:none;width:100%}
+}
+
+@media(max-width:760px){
+  .sidebar{
+    width:100%;
+    min-width:100%;
+    height:calc(64px + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);
+    top:auto;
+    bottom:0;
+    border-top:1px solid rgba(255,255,255,.08);
+    flex-direction:row;
+    overflow:hidden;
+  }
+  .sb-logo,.sb-section,.sb-profile,.sb-logout{display:none}
+  .sb-nav{
+    display:flex;
+    flex-direction:row;
+    align-items:stretch;
+    width:100%;
+    padding:0;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .sb-nav::-webkit-scrollbar{display:none}
+  .sb-item{
+    flex:0 0 64px;
+    width:64px;
+    height:64px;
+    padding:0;
+    justify-content:center;
+    border-left:none;
+    border-top:2px solid transparent;
+  }
+  .sb-item.active{
+    border-left:none;
+    border-top-color:var(--vl);
+    background:rgba(123,184,104,.12);
+  }
+
+  .main{margin-left:0;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  .grid-3,.grid-4{grid-template-columns:1fr}
+  .card,.stat-card,.ia-card{padding:1rem}
+  .prod-hero{padding:1.2rem}
+  .prod-hero-nome{font-size:1.25rem}
+  .prod-status-grid{grid-template-columns:1fr}
+  .activity-item{flex-direction:column;gap:.25rem}
+  .activity-time{white-space:normal}
+  .caderno-week-header{flex-direction:column;align-items:flex-start;gap:.45rem}
+  .caderno-week-header > div{width:100%;justify-content:space-between}
+  .ia-actions{flex-direction:column;align-items:stretch}
+  .ia-btn{width:100%;text-align:center}
+  .family-row{flex-wrap:wrap}
+  .fam-status{margin-left:0;width:100%;justify-content:flex-start}
+}
+
+@media(max-width:520px){
+  #login-screen{align-items:stretch;justify-content:flex-start;overflow-y:auto;padding:.9rem}
+  .login-box{padding:1.2rem 1rem}
+  .login-logo{font-size:1.9rem}
+  .login-sub{font-size:.72rem}
+  .login-label{margin-bottom:.55rem}
+  .topbar{padding:.7rem .85rem}
+  #topbar-ctx{display:none}
+  .tag{font-size:.62rem;letter-spacing:.08em;padding:.25rem .55rem}
+  .content{padding:.85rem}
+  .sec-title{font-size:.95rem}
+  .stat-num{font-size:1.6rem}
+  .modal{max-height:84vh}
+  .modal-footer{flex-wrap:wrap}
+  .modal-footer .btn{width:100%}
 }
 </style>
 </head>
@@ -911,6 +1015,9 @@ let produtorAtual = null;
 let fichaAtual = null;
 let usuarioLogado = null;
 let modoCadastro = false;
+let ultimaIAEdgeProd = '';
+let ultimaIAEdgeProdMeta = 'Use a IA Edge para gerar uma orientação personalizada.';
+let iaEdgeProdCarregando = false;
 
 function resolveApiBase() {
   const fromMeta = document.querySelector('meta[name="nexus-api-base"]')?.content?.trim();
@@ -921,33 +1028,68 @@ function resolveApiBase() {
   return `${window.location.origin}/api`;
 }
 
+function resolveAIEndpoint() {
+  const fromMeta = document.querySelector('meta[name="nexus-ai-endpoint"]')?.content?.trim();
+  if(fromMeta && fromMeta !== '__AUTO__') return fromMeta;
+
+  const isLocal = ['localhost','127.0.0.1'].includes(window.location.hostname);
+  if(isLocal) return 'http://localhost:3000/api/ia';
+  return `${window.location.origin}/api/ia`;
+}
+
 const API_BASE = resolveApiBase();
+const AI_ENDPOINT = resolveAIEndpoint();
 const AUTH_MODE = (document.querySelector('meta[name="nexus-auth-mode"]')?.content || 'local').toLowerCase();
 const LOCAL_USERS_KEY = 'nexus_users_v1';
 const LOCAL_SESSION_KEY = 'nexus_session_v1';
+const MEMORY_AUTH_STORE = { users: [], session: null };
+const AI_TIMEOUT_MS = 18000;
 
 function safeParseJson(raw, fallback) {
   try { return JSON.parse(raw); } catch(_e) { return fallback; }
 }
 
 function getLocalUsers() {
-  return safeParseJson(localStorage.getItem(LOCAL_USERS_KEY) || '[]', []);
+  try {
+    return safeParseJson(localStorage.getItem(LOCAL_USERS_KEY) || '[]', []);
+  } catch (_e) {
+    return Array.isArray(MEMORY_AUTH_STORE.users) ? MEMORY_AUTH_STORE.users : [];
+  }
 }
 
 function setLocalUsers(users) {
-  localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+  MEMORY_AUTH_STORE.users = Array.isArray(users) ? users : [];
+  try {
+    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(MEMORY_AUTH_STORE.users));
+  } catch (_e) {
+    // Safari/private mode pode bloquear localStorage; usa memória da sessão.
+  }
 }
 
 function getLocalSession() {
-  return safeParseJson(localStorage.getItem(LOCAL_SESSION_KEY) || 'null', null);
+  try {
+    return safeParseJson(localStorage.getItem(LOCAL_SESSION_KEY) || 'null', null);
+  } catch (_e) {
+    return MEMORY_AUTH_STORE.session || null;
+  }
 }
 
 function setLocalSession(user) {
-  localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(user));
+  MEMORY_AUTH_STORE.session = user || null;
+  try {
+    localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(MEMORY_AUTH_STORE.session));
+  } catch (_e) {
+    // Safari/private mode pode bloquear localStorage; usa memória da sessão.
+  }
 }
 
 function clearLocalSession() {
-  localStorage.removeItem(LOCAL_SESSION_KEY);
+  MEMORY_AUTH_STORE.session = null;
+  try {
+    localStorage.removeItem(LOCAL_SESSION_KEY);
+  } catch (_e) {
+    // Sem persistência local disponível.
+  }
 }
 
 const LIVE_ACTIVITIES = [];
@@ -1104,6 +1246,33 @@ async function requestAPI(path, options = {}) {
   return body;
 }
 
+async function requestAIEdge(payload) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
+  let resp;
+  try {
+    resp = await fetch(AI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+  } catch (err) {
+    if(err?.name === 'AbortError') {
+      throw new Error('A IA Edge demorou para responder. Tente novamente.');
+    }
+    throw new Error(`Não consegui conectar com a IA Edge em ${AI_ENDPOINT}.`);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  const isJson = resp.headers.get('content-type')?.includes('application/json');
+  const body = isJson ? await resp.json() : {};
+  if(!resp.ok) throw new Error(body.error || 'Falha ao gerar recomendação com IA Edge.');
+  return body;
+}
+
 function getCookie(name) {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
@@ -1167,6 +1336,71 @@ function criarPerfilProdutorBasico(usuario) {
   };
   DB.familias.push(perfilBasico);
   return perfilBasico;
+}
+
+function fallbackRecomendacaoProdutor(f) {
+  const culturaPrincipal = (f?.culturas || 'cultivo').split(',')[0].trim().toLowerCase();
+  return `Priorize monitoramento diário de ${culturaPrincipal}, com checagem de umidade do solo em 2 pontos do lote (manhã e fim da tarde). Se houver sinais de estresse, faça irrigação leve no início da manhã e registre no caderno para nova análise na próxima semana.`;
+}
+
+function setLoadingIAEdgeProdutor(isLoading) {
+  iaEdgeProdCarregando = isLoading;
+  const btn = document.getElementById('btn-ia-edge-prod');
+  if(!btn) return;
+  btn.disabled = isLoading;
+  btn.textContent = isLoading ? 'Gerando recomendação...' : 'Gerar recomendação com IA Edge';
+}
+
+function atualizarBlocoIAEdgeProdutor() {
+  const textEl = document.getElementById('prod-ia-edge-text');
+  const metaEl = document.getElementById('prod-ia-edge-meta');
+  if(textEl) textEl.textContent = ultimaIAEdgeProd || 'Toque no botão abaixo para gerar uma recomendação nova com IA Edge.';
+  if(metaEl) metaEl.textContent = ultimaIAEdgeProdMeta;
+}
+
+async function gerarRecomendacaoIAProdutor() {
+  if(iaEdgeProdCarregando) return;
+  if(!produtorAtual) {
+    showToast('Perfil do produtor não encontrado.', 'warn');
+    return;
+  }
+
+  setLoadingIAEdgeProdutor(true);
+  ultimaIAEdgeProdMeta = 'Consultando IA Edge...';
+  ultimaIAEdgeProd = 'Analisando seu contexto atual e montando recomendação personalizada...';
+  atualizarBlocoIAEdgeProdutor();
+
+  try {
+    const payload = {
+      role: 'produtor',
+      nome: produtorAtual.nome,
+      cultura: produtorAtual.culturas,
+      solo: produtorAtual.solo,
+      clima: 'Contexto amazônico (simulado no MVP)',
+      desafio: produtorAtual.desafio,
+      semana: produtorAtual.semana
+    };
+    const data = await requestAIEdge(payload);
+    const recomendacao = data?.recommendation || data?.text || '';
+    if(!recomendacao) throw new Error('A IA Edge não retornou recomendação.');
+
+    ultimaIAEdgeProd = recomendacao.trim();
+    if(data?.source === 'openai') {
+      ultimaIAEdgeProdMeta = 'Gerado por IA Edge agora mesmo.';
+    } else {
+      ultimaIAEdgeProdMeta = 'Gerado em modo contingência (sem chave de IA no servidor).';
+    }
+    showToast('Recomendação IA atualizada com sucesso.');
+    addLiveActivity(`Nova recomendação IA gerada para ${produtorAtual.nome.split(' ')[0]}.`);
+  } catch (err) {
+    console.error(err);
+    ultimaIAEdgeProd = fallbackRecomendacaoProdutor(produtorAtual);
+    ultimaIAEdgeProdMeta = err?.message || 'Falha ao gerar com IA Edge.';
+    showToast('Não foi possível gerar na IA Edge. Mostrando recomendação de contingência.', 'warn');
+  } finally {
+    setLoadingIAEdgeProdutor(false);
+    atualizarBlocoIAEdgeProdutor();
+  }
 }
 
 function atualizarLoginUI() {
@@ -1512,6 +1746,15 @@ function renderProdIA() {
   const f = produtorAtual;
   document.getElementById('prod-ia-sub').textContent = 'Análises para ' + f.nome + ' · Semana ' + f.semana;
   document.getElementById('prod-ia-cards').innerHTML = `
+    <div class="ia-card" style="background:linear-gradient(135deg,#15311e 0%,#205e34 100%)">
+      <div class="ia-badge">IA Edge · Recomendação ao vivo</div>
+      <div class="ia-title">Análise personalizada para sua propriedade</div>
+      <div class="ia-text" id="prod-ia-edge-text">${ultimaIAEdgeProd || 'Toque no botão abaixo para gerar uma recomendação nova com IA Edge.'}</div>
+      <div class="ia-edge-note" id="prod-ia-edge-meta">${ultimaIAEdgeProdMeta}</div>
+      <div class="ia-actions">
+        <button class="ia-btn" id="btn-ia-edge-prod" onclick="gerarRecomendacaoIAProdutor()">Gerar recomendação com IA Edge</button>
+      </div>
+    </div>
     <div class="ia-card">
       <div class="ia-badge">IA · Análise do seu caderno · Semana ${f.semana}</div>
       <div class="ia-title">${f.desafio} — o que fazer</div>
@@ -1529,6 +1772,8 @@ function renderProdIA() {
         <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="showView('videos')">Ver vídeo sobre ${f.culturas.split(',')[0].trim()}</button>
       </div>
     </div>`;
+  atualizarBlocoIAEdgeProdutor();
+  setLoadingIAEdgeProdutor(iaEdgeProdCarregando);
 }
 
 function renderProdCaderno() {
@@ -1688,12 +1933,33 @@ document.getElementById('register-name').addEventListener('keydown', function(e)
   if(e.key === 'Enter') fazerLogin();
 });
 
-updateTemporalLabels();
-updateTopbarClock();
-setInterval(updateTopbarClock, 30000);
-startLiveActivityTicker();
-atualizarLoginUI();
-iniciarSessaoSeValida();
+window.addEventListener('error', (event) => {
+  console.error('Erro global na interface:', event.error || event.message);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Promise rejeitada sem tratamento:', event.reason);
+});
+
+async function bootApp() {
+  try {
+    updateTemporalLabels();
+    updateTopbarClock();
+    setInterval(updateTopbarClock, 30000);
+    startLiveActivityTicker();
+    atualizarLoginUI();
+    await iniciarSessaoSeValida();
+  } catch (err) {
+    console.error('Falha ao iniciar a aplicação:', err);
+    const loginScreen = document.getElementById('login-screen');
+    const app = document.getElementById('app');
+    if(app) app.classList.remove('visible');
+    if(loginScreen) loginScreen.style.display = 'flex';
+    setLoginStatus('Erro ao iniciar. Recarregue a página e tente novamente.', true);
+  }
+}
+
+bootApp();
 </script>
 </body>
 </html>
