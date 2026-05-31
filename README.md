@@ -7,7 +7,22 @@ Plataforma de gestão de famílias e produção agrícola da comunidade de Jutai
 - `plataformanexus.html`: frontend protótipo (admin e produtor).
 - `backend/`: API de autenticação real (Express + JSON local + JWT em cookie HttpOnly).
 
-## Como rodar a autenticação local
+## Como rodar (modo simples)
+
+Atualmente o login/cadastro está em modo simples no frontend (`localStorage`), para acelerar desenvolvimento:
+
+- Administrador: pode cadastrar e fazer login
+- Produtor: pode cadastrar e fazer login
+- Os dados ficam salvos no navegador local (não é multiusuário real)
+
+Para abrir:
+
+1. Rode o frontend (ex: Live Server):
+- `http://localhost:5500/plataformanexus.html`
+
+## Backend (opcional por enquanto)
+
+Se quiser testar o backend também, mantenha estes passos:
 
 1. Instale dependências:
 ```bash
@@ -36,9 +51,8 @@ npm run dev
 
 API: `http://localhost:3333`
 
-5. Rode o frontend (ex: Live Server):
+5. Rode o frontend:
 - `http://localhost:5500/plataformanexus.html`
-- Em ambiente local, o frontend usa automaticamente `http://localhost:3333/api`.
 
 ## Usuários de desenvolvimento
 
@@ -47,8 +61,8 @@ API: `http://localhost:3333`
 
 ## Regras de acesso (MVP atual)
 
-- `Administrador` e `Coordenador`: contas fixas criadas pela equipe de desenvolvimento.
-- `Produtor`: pode se cadastrar na própria tela de login e já entrar em seguida.
+- Administrador: cadastro e login pela tela.
+- Produtor: cadastro e login pela tela.
 
 ## Deploy na Vercel
 

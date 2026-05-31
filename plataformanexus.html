@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="nexus-api-base" content="__AUTO__"/>
+<meta name="nexus-auth-mode" content="local"/>
 <title>Nexus — Plataforma</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -274,7 +275,7 @@ textarea.form-input{resize:vertical;min-height:90px}
     </div>
     <div class="login-label">Senha</div>
     <input class="login-input" id="login-password" type="password" placeholder="Sua senha" autocomplete="current-password"/>
-    <button class="login-switch hidden" id="btn-toggle-cadastro" onclick="alternarCadastroProdutor()"></button>
+    <button class="login-switch hidden" id="btn-toggle-cadastro" onclick="alternarModoCadastro()"></button>
     <div class="login-help" id="login-help-text"></div>
     <button class="btn-login" id="btn-login-submit" onclick="fazerLogin()">Entrar na Plataforma</button>
     <div class="login-status" id="login-status"></div>
@@ -878,7 +879,7 @@ let perfil = 'admin';
 let produtorAtual = null;
 let fichaAtual = null;
 let usuarioLogado = null;
-let modoCadastroProdutor = false;
+let modoCadastro = false;
 
 function resolveApiBase() {
   const fromMeta = document.querySelector('meta[name="nexus-api-base"]')?.content?.trim();
@@ -890,6 +891,33 @@ function resolveApiBase() {
 }
 
 const API_BASE = resolveApiBase();
+const AUTH_MODE = (document.querySelector('meta[name="nexus-auth-mode"]')?.content || 'local').toLowerCase();
+const LOCAL_USERS_KEY = 'nexus_users_v1';
+const LOCAL_SESSION_KEY = 'nexus_session_v1';
+
+function safeParseJson(raw, fallback) {
+  try { return JSON.parse(raw); } catch(_e) { return fallback; }
+}
+
+function getLocalUsers() {
+  return safeParseJson(localStorage.getItem(LOCAL_USERS_KEY) || '[]', []);
+}
+
+function setLocalUsers(users) {
+  localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+}
+
+function getLocalSession() {
+  return safeParseJson(localStorage.getItem(LOCAL_SESSION_KEY) || 'null', null);
+}
+
+function setLocalSession(user) {
+  localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(user));
+}
+
+function clearLocalSession() {
+  localStorage.removeItem(LOCAL_SESSION_KEY);
+}
 
 function setLoginStatus(msg, isError = false) {
   const statusEl = document.getElementById('login-status');
@@ -902,10 +930,10 @@ function setLoadingLogin(isLoading) {
   if(!btn) return;
   btn.disabled = isLoading;
   if(isLoading) {
-    btn.textContent = (perfil === 'produtor' && modoCadastroProdutor) ? 'Cadastrando...' : 'Entrando...';
+    btn.textContent = modoCadastro ? 'Cadastrando...' : 'Entrando...';
     return;
   }
-  btn.textContent = (perfil === 'produtor' && modoCadastroProdutor) ? 'Cadastrar e Entrar' : 'Entrar na Plataforma';
+  btn.textContent = modoCadastro ? 'Cadastrar e Entrar' : 'Entrar na Plataforma';
 }
 
 async function requestAPI(path, options = {}) {
@@ -944,6 +972,32 @@ function slugFromEmail(email) {
   return slug || `prod-${Date.now().toString(36)}`;
 }
 
+function gerarIdUsuario() {
+  return `u_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+}
+
+function loginLocal(email, password, roleEsperada) {
+  const user = getLocalUsers().find(u => u.email === email && u.password === password && u.role === roleEsperada);
+  return user || null;
+}
+
+function cadastrarLocal({ name, email, password, role }) {
+  const users = getLocalUsers();
+  if(users.some(u => u.email === email)) throw new Error('Esse email já está cadastrado.');
+  const user = {
+    id: gerarIdUsuario(),
+    name,
+    email,
+    password,
+    role,
+    familyId: role === 'produtor' ? slugFromEmail(email) : null,
+    createdAt: new Date().toISOString()
+  };
+  users.push(user);
+  setLocalUsers(users);
+  return user;
+}
+
 function criarPerfilProdutorBasico(usuario) {
   const nome = usuario?.name || 'Produtor';
   const id = usuario?.familyId || slugFromEmail(usuario?.email);
@@ -972,22 +1026,24 @@ function criarPerfilProdutorBasico(usuario) {
 }
 
 function atualizarLoginUI() {
-  const isProdutor = perfil === 'produtor';
-  const emCadastro = isProdutor && modoCadastroProdutor;
+  const tipoTxt = perfil === 'admin' ? 'administrador' : 'produtor';
+  const emCadastro = modoCadastro;
   const wrapNome = document.getElementById('cadastro-nome-wrap');
   const btnToggle = document.getElementById('btn-toggle-cadastro');
   const help = document.getElementById('login-help-text');
+
   if(wrapNome) wrapNome.style.display = emCadastro ? 'block' : 'none';
   if(btnToggle) {
-    btnToggle.classList.toggle('hidden', !isProdutor);
-    btnToggle.textContent = emCadastro ? 'Já tenho conta de produtor' : 'Sou produtor e quero me cadastrar';
+    btnToggle.classList.remove('hidden');
+    btnToggle.textContent = emCadastro ? `Já tenho conta de ${tipoTxt}` : `Quero me cadastrar como ${tipoTxt}`;
   }
   if(help) {
-    help.innerHTML = perfil === 'admin'
-      ? 'Conta de <strong>Administrador</strong> é criada pela equipe técnica e enviada ao responsável.'
-      : (emCadastro
-        ? 'Cadastre seu acesso de produtor para entrar na plataforma.'
-        : 'Produtor já cadastrado: informe email e senha para entrar.');
+    const storageMsg = AUTH_MODE === 'local'
+      ? 'Modo simples ativo: dados salvos no navegador.'
+      : 'Modo API ativo.';
+    help.innerHTML = emCadastro
+      ? `Cadastro de <strong>${tipoTxt}</strong>. ${storageMsg}`
+      : `Login de <strong>${tipoTxt}</strong>. ${storageMsg}`;
   }
   if(!document.getElementById('btn-login-submit').disabled) setLoadingLogin(false);
 }
@@ -997,14 +1053,12 @@ function selectPerfil(p) {
   perfil = p;
   document.getElementById('card-admin').classList.toggle('selected', p==='admin');
   document.getElementById('card-produtor').classList.toggle('selected', p==='produtor');
-  if(p === 'admin') modoCadastroProdutor = false;
   setLoginStatus('');
   atualizarLoginUI();
 }
 
-function alternarCadastroProdutor() {
-  if(perfil !== 'produtor') return;
-  modoCadastroProdutor = !modoCadastroProdutor;
+function alternarModoCadastro() {
+  modoCadastro = !modoCadastro;
   setLoginStatus('');
   atualizarLoginUI();
 }
@@ -1045,8 +1099,8 @@ function aplicarSessao(usuario) {
 }
 
 async function fazerLogin() {
-  if(perfil === 'produtor' && modoCadastroProdutor) {
-    await cadastrarProdutor();
+  if(modoCadastro) {
+    await cadastrarUsuario();
     return;
   }
 
@@ -1060,11 +1114,19 @@ async function fazerLogin() {
   setLoginStatus('');
   setLoadingLogin(true);
   try {
-    const data = await requestAPI('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, perfil })
-    });
-    aplicarSessao(data.user);
+    const roleEsperada = perfil === 'admin' ? 'admin' : 'produtor';
+    if(AUTH_MODE === 'local') {
+      const user = loginLocal(email, password, roleEsperada);
+      if(!user) throw new Error('Credenciais inválidas.');
+      setLocalSession(user);
+      aplicarSessao(user);
+    } else {
+      const data = await requestAPI('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, perfil })
+      });
+      aplicarSessao(data.user);
+    }
   } catch (err) {
     setLoginStatus(err.message || 'Falha no login. Verifique suas credenciais.', true);
   } finally {
@@ -1072,7 +1134,7 @@ async function fazerLogin() {
   }
 }
 
-async function cadastrarProdutor() {
+async function cadastrarUsuario() {
   const name = document.getElementById('register-name').value.trim();
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
@@ -1080,34 +1142,48 @@ async function cadastrarProdutor() {
     setLoginStatus('Preencha nome, email e senha para cadastrar.', true);
     return;
   }
-  if(password.length < 10) {
-    setLoginStatus('A senha do produtor precisa ter no mínimo 10 caracteres.', true);
+  if(password.length < 6) {
+    setLoginStatus('Use uma senha com pelo menos 6 caracteres.', true);
     return;
   }
 
   setLoginStatus('');
   setLoadingLogin(true);
   try {
-    const data = await requestAPI('/auth/register-producer', {
-      method: 'POST',
-      body: JSON.stringify({ name, email, password })
-    });
-    aplicarSessao(data.user);
+    const role = perfil === 'admin' ? 'admin' : 'produtor';
+    if(AUTH_MODE === 'local') {
+      const user = cadastrarLocal({ name, email, password, role });
+      setLocalSession(user);
+      aplicarSessao(user);
+    } else if(role === 'produtor') {
+      const data = await requestAPI('/auth/register-producer', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password })
+      });
+      aplicarSessao(data.user);
+    } else {
+      throw new Error('Cadastro de administrador no modo API ainda não está habilitado.');
+    }
   } catch(err) {
-    setLoginStatus(err.message || 'Falha ao cadastrar produtor.', true);
+    setLoginStatus(err.message || 'Falha ao cadastrar usuário.', true);
   } finally {
     setLoadingLogin(false);
   }
 }
 
 async function voltarLogin() {
-  try { await requestAPI('/auth/logout', { method: 'POST' }); } catch(_e) {}
+  if(AUTH_MODE !== 'local') {
+    try { await requestAPI('/auth/logout', { method: 'POST' }); } catch(_e) {}
+  } else {
+    clearLocalSession();
+  }
   usuarioLogado = null;
   document.getElementById('app').classList.remove('visible');
   document.getElementById('login-screen').style.display = 'flex';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   setLoginStatus('');
   atualizarLoginUI();
+  document.getElementById('register-name').value = '';
 }
 
 // ═══ LISTA FAMÍLIAS ═══
@@ -1430,6 +1506,13 @@ function enviarFotoProd() {
 }
 
 async function iniciarSessaoSeValida() {
+  if(AUTH_MODE === 'local') {
+    const sessao = getLocalSession();
+    if(sessao) aplicarSessao(sessao);
+    else document.getElementById('login-screen').style.display = 'flex';
+    return;
+  }
+
   try {
     const data = await requestAPI('/auth/me');
     aplicarSessao(data.user);
