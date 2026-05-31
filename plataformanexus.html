@@ -59,6 +59,29 @@ input,textarea,select{font-family:'IBM Plex Sans',sans-serif}
   color:var(--creme);font-size:.88rem;margin-bottom:1.2rem;
 }
 .login-user-select option{background:var(--vd);color:var(--creme)}
+.login-input{
+  width:100%;padding:.7rem 1rem;border-radius:6px;
+  border:1px solid rgba(123,184,104,.2);background:rgba(255,255,255,.05);
+  color:var(--creme);font-size:.88rem;margin-bottom:.9rem;
+}
+.login-input::placeholder{color:rgba(184,217,164,.55)}
+.login-input:focus{outline:none;border-color:var(--vl)}
+.login-help{
+  font-size:.72rem;color:rgba(184,217,164,.7);
+  background:rgba(123,184,104,.08);
+  border:1px solid rgba(123,184,104,.18);
+  border-radius:6px;padding:.7rem .8rem;margin-bottom:1.2rem;text-align:left;line-height:1.55;
+}
+.login-help code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:rgba(123,184,104,.16);
+  padding:.08rem .32rem;border-radius:3px;color:var(--creme);
+}
+.login-status{
+  font-size:.74rem;margin-top:.9rem;color:var(--vl);min-height:1.1rem;
+}
+.login-status.error{color:#F1B3B3}
+.btn-login:disabled{opacity:.75;cursor:not-allowed}
 .btn-login{
   width:100%;padding:.9rem;background:var(--vl);border:none;border-radius:6px;
   color:var(--vd);font-size:.88rem;font-weight:600;letter-spacing:.05em;
@@ -236,12 +259,13 @@ textarea.form-input{resize:vertical;min-height:90px}
         <div class="perfil-desc">Acesso ao meu lote e recomendações</div>
       </div>
     </div>
-    <div class="login-label">Usuário</div>
-    <select class="login-user-select" id="login-user-select">
-      <option value="donato">Donato Silva — Gestor · Vila Jutaí</option>
-      <option value="marcelo">Marcelo Heinen — Coordenador de Campo</option>
-    </select>
-    <button class="btn-login" onclick="fazerLogin()">Entrar na Plataforma</button>
+    <div class="login-label">Email</div>
+    <input class="login-input" id="login-email" type="email" placeholder="voce@nexus.local" autocomplete="username"/>
+    <div class="login-label">Senha</div>
+    <input class="login-input" id="login-password" type="password" placeholder="Sua senha" autocomplete="current-password"/>
+    <div class="login-help">Acesso de desenvolvimento: <code>donato@nexus.local</code> ou <code>raimundo@nexus.local</code> com senha <code>Nexus@2026</code>.</div>
+    <button class="btn-login" id="btn-login-submit" onclick="fazerLogin()">Entrar na Plataforma</button>
+    <div class="login-status" id="login-status"></div>
   </div>
 </div>
 
@@ -841,40 +865,64 @@ const DB = {
 let perfil = 'admin';
 let produtorAtual = null;
 let fichaAtual = null;
+let usuarioLogado = null;
+const API_BASE = 'http://localhost:3333/api';
+
+function setLoginStatus(msg, isError = false) {
+  const statusEl = document.getElementById('login-status');
+  statusEl.textContent = msg || '';
+  statusEl.classList.toggle('error', !!isError);
+}
+
+function setLoadingLogin(isLoading) {
+  const btn = document.getElementById('btn-login-submit');
+  if(!btn) return;
+  btn.disabled = isLoading;
+  btn.textContent = isLoading ? 'Entrando...' : 'Entrar na Plataforma';
+}
+
+async function requestAPI(path, options = {}) {
+  const resp = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options
+  });
+  const isJson = resp.headers.get('content-type')?.includes('application/json');
+  const body = isJson ? await resp.json() : {};
+  if(!resp.ok) throw new Error(body.error || 'Não foi possível concluir a requisição.');
+  return body;
+}
 
 // ═══ LOGIN ═══
 function selectPerfil(p) {
   perfil = p;
   document.getElementById('card-admin').classList.toggle('selected', p==='admin');
   document.getElementById('card-produtor').classList.toggle('selected', p==='produtor');
-  const sel = document.getElementById('login-user-select');
-  sel.innerHTML = '';
-  if(p === 'admin') {
-    sel.innerHTML = `<option value="donato">Donato Silva — Gestor · Vila Jutaí</option><option value="marcelo">Marcelo Heinen — Coordenador de Campo</option>`;
-  } else {
-    DB.produtores.forEach(pr => {
-      sel.innerHTML += `<option value="${pr.id}">${pr.nome}</option>`;
-    });
-  }
+  setLoginStatus('');
 }
 
-function fazerLogin() {
-  const sel = document.getElementById('login-user-select');
+function aplicarSessao(usuario) {
+  usuarioLogado = usuario || null;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
-  if(perfil === 'admin') {
+
+  const role = usuario?.role || perfil;
+  const adminMode = role === 'admin' || role === 'coordenador';
+  if(adminMode) {
     document.getElementById('sidebar-admin').style.display = 'flex';
     document.getElementById('sidebar-produtor').style.display = 'none';
     document.getElementById('btn-nova-familia').style.display = '';
-    const isD = sel.value === 'donato';
-    document.getElementById('sb-avatar-txt').textContent = isD ? 'DO' : 'MH';
-    document.getElementById('sb-name-txt').textContent = isD ? 'Donato Silva' : 'Marcelo Heinen';
-    document.getElementById('sb-role-txt').textContent = isD ? 'Gestor · Vila Jutaí' : 'Coord. de Campo';
+    const nome = usuario?.name || 'Administrador';
+    const roleTxt = role === 'coordenador' ? 'Coord. de Campo' : 'Gestor · Vila Jutaí';
+    document.getElementById('sb-avatar-txt').textContent = nome.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+    document.getElementById('sb-name-txt').textContent = nome;
+    document.getElementById('sb-role-txt').textContent = roleTxt;
     renderListaFamilias();
     renderCardsCaderno();
     showView('dashboard');
   } else {
-    produtorAtual = DB.familias.find(f => f.id === sel.value);
+    const emailId = (usuario?.email || '').split('@')[0];
+    produtorAtual = DB.familias.find(f => f.id === usuario?.familyId) || DB.familias.find(f => f.id === emailId);
     if(!produtorAtual) produtorAtual = DB.familias[0];
     document.getElementById('sidebar-admin').style.display = 'none';
     document.getElementById('sidebar-produtor').style.display = 'flex';
@@ -888,10 +936,36 @@ function fazerLogin() {
   }
 }
 
-function voltarLogin() {
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  if(!email || !password) {
+    setLoginStatus('Informe email e senha para entrar.', true);
+    return;
+  }
+
+  setLoginStatus('');
+  setLoadingLogin(true);
+  try {
+    const data = await requestAPI('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, perfil })
+    });
+    aplicarSessao(data.user);
+  } catch (err) {
+    setLoginStatus(err.message || 'Falha no login. Verifique suas credenciais.', true);
+  } finally {
+    setLoadingLogin(false);
+  }
+}
+
+async function voltarLogin() {
+  try { await requestAPI('/auth/logout', { method: 'POST' }); } catch(_e) {}
+  usuarioLogado = null;
   document.getElementById('app').classList.remove('visible');
   document.getElementById('login-screen').style.display = 'flex';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  setLoginStatus('');
 }
 
 // ═══ LISTA FAMÍLIAS ═══
@@ -1212,6 +1286,24 @@ function enviarFotoProd() {
   alert('Foto enviada com sucesso! Nossa IA está analisando seu caderno. Você receberá as recomendações em breve.');
   showView('prod-ia');
 }
+
+async function iniciarSessaoSeValida() {
+  try {
+    const data = await requestAPI('/auth/me');
+    aplicarSessao(data.user);
+  } catch (_e) {
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+}
+
+document.getElementById('login-password').addEventListener('keydown', function(e) {
+  if(e.key === 'Enter') fazerLogin();
+});
+document.getElementById('login-email').addEventListener('keydown', function(e) {
+  if(e.key === 'Enter') fazerLogin();
+});
+
+iniciarSessaoSeValida();
 </script>
 </body>
 </html>
