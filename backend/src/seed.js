@@ -1,42 +1,42 @@
-import { findUserByExactEmail, insertUser } from "./db.js";
+import { upsertUserByEmail } from "./db.js";
 import { hashPassword } from "./password.js";
 
 const seeds = [
   {
     email: "donato@nexus.local",
     name: "Donato Silva",
-    role: "admin",
-    password: "Nexus@2026"
+    role: "admin"
   },
   {
     email: "marcelo@nexus.local",
     name: "Marcelo Heinen",
-    role: "coordenador",
-    password: "Nexus@2026"
+    role: "coordenador"
   },
   {
     email: "raimundo@nexus.local",
     name: "Raimundo Nonato Gonçalves",
     role: "produtor",
-    familyId: "raimundo",
-    password: "Nexus@2026"
+    familyId: "raimundo"
   },
   {
     email: "pompeu@nexus.local",
     name: "José Maria Pompeu",
     role: "produtor",
-    familyId: "pompeu",
-    password: "Nexus@2026"
+    familyId: "pompeu"
   }
 ];
 
 async function run() {
-  for (const user of seeds) {
-    const alreadyExists = findUserByExactEmail(user.email);
-    if (alreadyExists) continue;
+  const defaultPassword = process.env.SEED_DEFAULT_PASSWORD;
+  if (!defaultPassword || defaultPassword.length < 12 || defaultPassword.includes("troque_")) {
+    throw new Error(
+      "Defina SEED_DEFAULT_PASSWORD no ambiente com no mínimo 12 caracteres antes de rodar o seed."
+    );
+  }
 
-    const passwordHash = hashPassword(user.password);
-    insertUser({
+  for (const user of seeds) {
+    const passwordHash = hashPassword(defaultPassword);
+    upsertUserByEmail({
       email: user.email,
       name: user.name,
       role: user.role,

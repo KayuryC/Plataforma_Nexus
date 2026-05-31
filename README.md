@@ -19,9 +19,13 @@ npm install
 ```bash
 cp .env.example .env
 ```
+Importante:
+- defina `JWT_ACCESS_SECRET` e `JWT_REFRESH_SECRET` com segredos fortes (>=32 chars)
+- defina `SEED_DEFAULT_PASSWORD` com senha forte (>=12 chars)
 
 3. Gere usuários de desenvolvimento:
 ```bash
+export SEED_DEFAULT_PASSWORD='SUA_SENHA_FORTE_AQUI'
 npm run seed
 ```
 
@@ -34,7 +38,7 @@ API: `http://localhost:3333`
 
 ## Usuários de desenvolvimento
 
-- `donato@nexus.local` / `Nexus@2026` (admin)
-- `marcelo@nexus.local` / `Nexus@2026` (coordenador)
-- `raimundo@nexus.local` / `Nexus@2026` (produtor)
-- `pompeu@nexus.local` / `Nexus@2026` (produtor)
+- `donato@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (admin)
+- `marcelo@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (coordenador)
+- `raimundo@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (produtor)
+- `pompeu@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (produtor)

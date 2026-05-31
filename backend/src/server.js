@@ -7,6 +7,7 @@ import {
   buildRefreshSession,
   clearAuthCookies,
   generateAccessToken,
+  generateCsrfToken,
   hashToken,
   setAuthCookies,
   verifyAccessToken,
@@ -20,9 +21,10 @@ import {
   insertRefreshToken,
   revokeRefreshToken
 } from "./db.js";
-import { verifyPassword } from "./password.js";
+import { hashPassword, verifyPassword } from "./password.js";
 
 const app = express();
+const DUMMY_PASSWORD_HASH = hashPassword("nexus_dummy_password_to_reduce_timing_leak");
 
 app.use(helmet());
 app.use(
@@ -62,6 +64,15 @@ function authFromAccessCookie(req) {
   }
 }
 
+function requireCsrf(req, res, next) {
+  const csrfCookie = req.cookies?.nexus_csrf;
+  const csrfHeader = req.get("x-csrf-token");
+  if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+    return res.status(403).json({ error: "Requisição bloqueada por proteção CSRF." });
+  }
+  return next();
+}
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "nexus-auth-api" });
 });
@@ -73,22 +84,21 @@ app.post("/api/auth/login", loginLimiter, async (req, res) => {
     return res.status(400).json({ error: "Email e senha são obrigatórios." });
   }
 
+  const requestedProfile = typeof perfil === "string" ? perfil : null;
   const user = findUserByEmail(email.trim().toLowerCase());
-  if (!user || !user.isActive) {
-    return res.status(401).json({ error: "Credenciais inválidas." });
-  }
+  const storedHash = user?.password_hash || DUMMY_PASSWORD_HASH;
+  const validPassword = verifyPassword(password, storedHash);
+  const profileOk =
+    !requestedProfile ||
+    (user && (requestedProfile === user.role || (requestedProfile === "admin" && user.role === "coordenador")));
 
-  if (perfil && perfil !== user.role && !(perfil === "admin" && user.role === "coordenador")) {
-    return res.status(403).json({ error: "Perfil selecionado não corresponde ao usuário." });
-  }
-
-  const validPassword = verifyPassword(password, user.password_hash);
-  if (!validPassword) {
+  if (!user || !user.isActive || !validPassword || !profileOk) {
     return res.status(401).json({ error: "Credenciais inválidas." });
   }
 
   const accessToken = generateAccessToken(user);
   const refresh = buildRefreshSession(user);
+  const csrfToken = generateCsrfToken();
   insertRefreshToken({
     id: refresh.jti,
     userId: user.id,
@@ -96,11 +106,11 @@ app.post("/api/auth/login", loginLimiter, async (req, res) => {
     expiresAt: refresh.expiresAt
   });
 
-  setAuthCookies(res, accessToken, refresh.refreshCookieValue);
+  setAuthCookies(res, accessToken, refresh.refreshCookieValue, csrfToken);
   return res.json({ user: cleanUser(user) });
 });
 
-app.post("/api/auth/refresh", (req, res) => {
+app.post("/api/auth/refresh", requireCsrf, (req, res) => {
   const cookieValue = req.cookies?.nexus_rt;
   if (!cookieValue || typeof cookieValue !== "string" || !cookieValue.includes(".")) {
     clearAuthCookies(res);
@@ -140,6 +150,7 @@ app.post("/api/auth/refresh", (req, res) => {
   revokeRefreshToken(stored.id);
   const accessToken = generateAccessToken(user);
   const refresh = buildRefreshSession(user);
+  const csrfToken = generateCsrfToken();
   insertRefreshToken({
     id: refresh.jti,
     userId: user.id,
@@ -147,7 +158,7 @@ app.post("/api/auth/refresh", (req, res) => {
     expiresAt: refresh.expiresAt
   });
 
-  setAuthCookies(res, accessToken, refresh.refreshCookieValue);
+  setAuthCookies(res, accessToken, refresh.refreshCookieValue, csrfToken);
   return res.json({ user: cleanUser(user) });
 });
 
@@ -164,7 +175,7 @@ app.get("/api/auth/me", (req, res) => {
   return res.json({ user: cleanUser(user) });
 });
 
-app.post("/api/auth/logout", (req, res) => {
+app.post("/api/auth/logout", requireCsrf, (req, res) => {
   const cookieValue = req.cookies?.nexus_rt;
   if (cookieValue && typeof cookieValue === "string") {
     const firstDot = cookieValue.indexOf(".");

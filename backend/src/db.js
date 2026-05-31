@@ -67,6 +67,40 @@ export function insertUser({ email, name, role, passwordHash, familyId = null })
   return normalizeUser(created);
 }
 
+export function upsertUserByEmail({ email, name, role, passwordHash, familyId = null }) {
+  const db = loadDb();
+  const normalizedEmail = email.toLowerCase();
+  const idx = db.users.findIndex((u) => u.email === normalizedEmail);
+
+  if (idx >= 0) {
+    db.users[idx] = {
+      ...db.users[idx],
+      name,
+      role,
+      familyId,
+      password_hash: passwordHash,
+      isActive: true
+    };
+    saveDb(db);
+    return normalizeUser(db.users[idx]);
+  }
+
+  db.counters.user += 1;
+  const created = {
+    id: db.counters.user,
+    email: normalizedEmail,
+    name,
+    role,
+    password_hash: passwordHash,
+    familyId,
+    isActive: true,
+    createdAt: new Date().toISOString()
+  };
+  db.users.push(created);
+  saveDb(db);
+  return normalizeUser(created);
+}
+
 export function insertRefreshToken({ id, userId, tokenHash, expiresAt }) {
   const db = loadDb();
   db.refreshTokens.push({

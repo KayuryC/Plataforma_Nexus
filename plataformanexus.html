@@ -263,7 +263,7 @@ textarea.form-input{resize:vertical;min-height:90px}
     <input class="login-input" id="login-email" type="email" placeholder="voce@nexus.local" autocomplete="username"/>
     <div class="login-label">Senha</div>
     <input class="login-input" id="login-password" type="password" placeholder="Sua senha" autocomplete="current-password"/>
-    <div class="login-help">Acesso de desenvolvimento: <code>donato@nexus.local</code> ou <code>raimundo@nexus.local</code> com senha <code>Nexus@2026</code>.</div>
+    <div class="login-help">Acesso de desenvolvimento: use os emails de teste e a senha definida em <code>SEED_DEFAULT_PASSWORD</code> no backend.</div>
     <button class="btn-login" id="btn-login-submit" onclick="fazerLogin()">Entrar na Plataforma</button>
     <div class="login-status" id="login-status"></div>
   </div>
@@ -882,15 +882,28 @@ function setLoadingLogin(isLoading) {
 }
 
 async function requestAPI(path, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if(['POST','PUT','PATCH','DELETE'].includes(method)) {
+    const csrf = getCookie('nexus_csrf');
+    if(csrf) headers['x-csrf-token'] = csrf;
+  }
+
   const resp = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers,
     ...options
   });
   const isJson = resp.headers.get('content-type')?.includes('application/json');
   const body = isJson ? await resp.json() : {};
   if(!resp.ok) throw new Error(body.error || 'Não foi possível concluir a requisição.');
   return body;
+}
+
+function getCookie(name) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : '';
 }
 
 // ═══ LOGIN ═══

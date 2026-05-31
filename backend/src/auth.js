@@ -16,7 +16,7 @@ export function generateAccessToken(user) {
       name: user.name
     },
     config.jwtAccessSecret,
-    { expiresIn: config.accessTokenTtl }
+    { expiresIn: config.accessTokenTtl, algorithm: "HS256" }
   );
 }
 
@@ -24,17 +24,18 @@ export function generateRefreshToken(user) {
   const jti = crypto.randomUUID();
   const raw = crypto.randomBytes(48).toString("base64url");
   const token = jwt.sign({ sub: String(user.id), jti, typ: "refresh" }, config.jwtRefreshSecret, {
-    expiresIn: config.refreshTokenTtl
+    expiresIn: config.refreshTokenTtl,
+    algorithm: "HS256"
   });
   return { jti, token, tokenHash: hashToken(`${raw}.${token}`), raw };
 }
 
 export function verifyAccessToken(token) {
-  return jwt.verify(token, config.jwtAccessSecret);
+  return jwt.verify(token, config.jwtAccessSecret, { algorithms: ["HS256"] });
 }
 
 export function verifyRefreshToken(token) {
-  return jwt.verify(token, config.jwtRefreshSecret);
+  return jwt.verify(token, config.jwtRefreshSecret, { algorithms: ["HS256"] });
 }
 
 function parseJwtExpiryToIso(token) {
@@ -55,7 +56,11 @@ export function buildRefreshSession(user) {
   };
 }
 
-export function setAuthCookies(res, accessToken, refreshValue) {
+export function generateCsrfToken() {
+  return crypto.randomBytes(24).toString("base64url");
+}
+
+export function setAuthCookies(res, accessToken, refreshValue, csrfToken) {
   const base = {
     httpOnly: true,
     secure: isProd,
@@ -72,6 +77,14 @@ export function setAuthCookies(res, accessToken, refreshValue) {
     ...base,
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
+
+  res.cookie("nexus_csrf", csrfToken, {
+    httpOnly: false,
+    secure: isProd,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 }
 
 export function clearAuthCookies(res) {
@@ -83,4 +96,10 @@ export function clearAuthCookies(res) {
   };
   res.clearCookie("nexus_at", base);
   res.clearCookie("nexus_rt", base);
+  res.clearCookie("nexus_csrf", {
+    httpOnly: false,
+    secure: isProd,
+    sameSite: "lax",
+    path: "/"
+  });
 }
