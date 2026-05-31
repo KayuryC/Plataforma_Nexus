@@ -36,6 +36,10 @@ npm run dev
 
 API: `http://localhost:3333`
 
+5. Rode o frontend (ex: Live Server):
+- `http://localhost:5500/plataformanexus.html`
+- Em ambiente local, o frontend usa automaticamente `http://localhost:3333/api`.
+
 ## Usuários de desenvolvimento
 
 - `donato@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (admin)
@@ -45,3 +49,14 @@ API: `http://localhost:3333`
 
 - `Administrador` e `Coordenador`: contas fixas criadas pela equipe de desenvolvimento.
 - `Produtor`: pode se cadastrar na própria tela de login e já entrar em seguida.
+
+## Deploy na Vercel
+
+- O frontend detecta automaticamente:
+  - local: `http://localhost:3333/api`
+  - produção: `${window.location.origin}/api`
+- Se a API estiver em outro domínio, ajuste no HTML:
+  - tag `<meta name="nexus-api-base" content="https://SUA-API/api"/>`
+- Recomendado para monorepo:
+  - projeto frontend com Root Directory `.`
+  - projeto backend com Root Directory `backend`

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="nexus-api-base" content="__AUTO__"/>
 <title>Nexus — Plataforma</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -878,7 +879,17 @@ let produtorAtual = null;
 let fichaAtual = null;
 let usuarioLogado = null;
 let modoCadastroProdutor = false;
-const API_BASE = 'http://localhost:3333/api';
+
+function resolveApiBase() {
+  const fromMeta = document.querySelector('meta[name="nexus-api-base"]')?.content?.trim();
+  if(fromMeta && fromMeta !== '__AUTO__') return fromMeta.replace(/\/+$/,'');
+
+  const isLocal = ['localhost','127.0.0.1'].includes(window.location.hostname);
+  if(isLocal) return 'http://localhost:3333/api';
+  return `${window.location.origin}/api`;
+}
+
+const API_BASE = resolveApiBase();
 
 function setLoginStatus(msg, isError = false) {
   const statusEl = document.getElementById('login-status');
@@ -913,7 +924,7 @@ async function requestAPI(path, options = {}) {
       ...options
     });
   } catch(_err) {
-    throw new Error('Não consegui conectar com o backend em http://localhost:3333.');
+    throw new Error(`Não consegui conectar com o backend em ${API_BASE}.`);
   }
   const isJson = resp.headers.get('content-type')?.includes('application/json');
   const body = isJson ? await resp.json() : {};
