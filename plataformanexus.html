@@ -72,6 +72,12 @@ input,textarea,select{font-family:'IBM Plex Sans',sans-serif}
   border:1px solid rgba(123,184,104,.18);
   border-radius:6px;padding:.7rem .8rem;margin-bottom:1.2rem;text-align:left;line-height:1.55;
 }
+.login-switch{
+  background:none;border:none;color:var(--vl);
+  font-size:.78rem;text-decoration:underline;margin-top:-.4rem;margin-bottom:1rem;
+}
+.login-switch:hover{color:var(--vc)}
+.login-switch.hidden{display:none}
 .login-help code{
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   background:rgba(123,184,104,.16);
@@ -261,9 +267,14 @@ textarea.form-input{resize:vertical;min-height:90px}
     </div>
     <div class="login-label">Email</div>
     <input class="login-input" id="login-email" type="email" placeholder="voce@nexus.local" autocomplete="username"/>
+    <div id="cadastro-nome-wrap" style="display:none">
+      <div class="login-label">Nome completo</div>
+      <input class="login-input" id="register-name" type="text" placeholder="Seu nome completo" autocomplete="name"/>
+    </div>
     <div class="login-label">Senha</div>
     <input class="login-input" id="login-password" type="password" placeholder="Sua senha" autocomplete="current-password"/>
-    <div class="login-help">Acesso de desenvolvimento: use os emails de teste e a senha definida em <code>SEED_DEFAULT_PASSWORD</code> no backend.</div>
+    <button class="login-switch hidden" id="btn-toggle-cadastro" onclick="alternarCadastroProdutor()"></button>
+    <div class="login-help" id="login-help-text"></div>
     <button class="btn-login" id="btn-login-submit" onclick="fazerLogin()">Entrar na Plataforma</button>
     <div class="login-status" id="login-status"></div>
   </div>
@@ -866,6 +877,7 @@ let perfil = 'admin';
 let produtorAtual = null;
 let fichaAtual = null;
 let usuarioLogado = null;
+let modoCadastroProdutor = false;
 const API_BASE = 'http://localhost:3333/api';
 
 function setLoginStatus(msg, isError = false) {
@@ -878,7 +890,11 @@ function setLoadingLogin(isLoading) {
   const btn = document.getElementById('btn-login-submit');
   if(!btn) return;
   btn.disabled = isLoading;
-  btn.textContent = isLoading ? 'Entrando...' : 'Entrar na Plataforma';
+  if(isLoading) {
+    btn.textContent = (perfil === 'produtor' && modoCadastroProdutor) ? 'Cadastrando...' : 'Entrando...';
+    return;
+  }
+  btn.textContent = (perfil === 'produtor' && modoCadastroProdutor) ? 'Cadastrar e Entrar' : 'Entrar na Plataforma';
 }
 
 async function requestAPI(path, options = {}) {
@@ -889,11 +905,16 @@ async function requestAPI(path, options = {}) {
     if(csrf) headers['x-csrf-token'] = csrf;
   }
 
-  const resp = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    headers,
-    ...options
-  });
+  let resp;
+  try {
+    resp = await fetch(`${API_BASE}${path}`, {
+      credentials: 'include',
+      headers,
+      ...options
+    });
+  } catch(_err) {
+    throw new Error('Não consegui conectar com o backend em http://localhost:3333.');
+  }
   const isJson = resp.headers.get('content-type')?.includes('application/json');
   const body = isJson ? await resp.json() : {};
   if(!resp.ok) throw new Error(body.error || 'Não foi possível concluir a requisição.');
@@ -906,12 +927,75 @@ function getCookie(name) {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
+function slugFromEmail(email) {
+  const base = String(email || '').split('@')[0].toLowerCase();
+  const slug = base.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 28);
+  return slug || `prod-${Date.now().toString(36)}`;
+}
+
+function criarPerfilProdutorBasico(usuario) {
+  const nome = usuario?.name || 'Produtor';
+  const id = usuario?.familyId || slugFromEmail(usuario?.email);
+  const partes = nome.split(' ').filter(Boolean);
+  const sigla = partes.slice(0,2).map(p => p[0]).join('').toUpperCase() || 'PR';
+  const perfilBasico = {
+    id,
+    sigla,
+    nome,
+    responsavel: nome,
+    filhos: 0,
+    ha: 0,
+    culturas: 'Não informado',
+    solo: 'Não informado',
+    agua: 'Não informado',
+    semana: 1,
+    status: 'regular',
+    engajamento: 0,
+    localizacao: 'Cadastro inicial',
+    desafio: 'Concluir cadastro técnico da propriedade',
+    treinamento: 'Pendente',
+    membros: 1
+  };
+  DB.familias.push(perfilBasico);
+  return perfilBasico;
+}
+
+function atualizarLoginUI() {
+  const isProdutor = perfil === 'produtor';
+  const emCadastro = isProdutor && modoCadastroProdutor;
+  const wrapNome = document.getElementById('cadastro-nome-wrap');
+  const btnToggle = document.getElementById('btn-toggle-cadastro');
+  const help = document.getElementById('login-help-text');
+  if(wrapNome) wrapNome.style.display = emCadastro ? 'block' : 'none';
+  if(btnToggle) {
+    btnToggle.classList.toggle('hidden', !isProdutor);
+    btnToggle.textContent = emCadastro ? 'Já tenho conta de produtor' : 'Sou produtor e quero me cadastrar';
+  }
+  if(help) {
+    help.innerHTML = perfil === 'admin'
+      ? 'Conta de <strong>Administrador</strong> é criada pela equipe técnica e enviada ao responsável.'
+      : (emCadastro
+        ? 'Cadastre seu acesso de produtor para entrar na plataforma.'
+        : 'Produtor já cadastrado: informe email e senha para entrar.');
+  }
+  if(!document.getElementById('btn-login-submit').disabled) setLoadingLogin(false);
+}
+
 // ═══ LOGIN ═══
 function selectPerfil(p) {
   perfil = p;
   document.getElementById('card-admin').classList.toggle('selected', p==='admin');
   document.getElementById('card-produtor').classList.toggle('selected', p==='produtor');
+  if(p === 'admin') modoCadastroProdutor = false;
   setLoginStatus('');
+  atualizarLoginUI();
+}
+
+function alternarCadastroProdutor() {
+  if(perfil !== 'produtor') return;
+  modoCadastroProdutor = !modoCadastroProdutor;
+  setLoginStatus('');
+  atualizarLoginUI();
 }
 
 function aplicarSessao(usuario) {
@@ -936,7 +1020,7 @@ function aplicarSessao(usuario) {
   } else {
     const emailId = (usuario?.email || '').split('@')[0];
     produtorAtual = DB.familias.find(f => f.id === usuario?.familyId) || DB.familias.find(f => f.id === emailId);
-    if(!produtorAtual) produtorAtual = DB.familias[0];
+    if(!produtorAtual) produtorAtual = criarPerfilProdutorBasico(usuario);
     document.getElementById('sidebar-admin').style.display = 'none';
     document.getElementById('sidebar-produtor').style.display = 'flex';
     document.getElementById('btn-nova-familia').style.display = 'none';
@@ -950,6 +1034,11 @@ function aplicarSessao(usuario) {
 }
 
 async function fazerLogin() {
+  if(perfil === 'produtor' && modoCadastroProdutor) {
+    await cadastrarProdutor();
+    return;
+  }
+
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
   if(!email || !password) {
@@ -972,6 +1061,34 @@ async function fazerLogin() {
   }
 }
 
+async function cadastrarProdutor() {
+  const name = document.getElementById('register-name').value.trim();
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  if(!name || !email || !password) {
+    setLoginStatus('Preencha nome, email e senha para cadastrar.', true);
+    return;
+  }
+  if(password.length < 10) {
+    setLoginStatus('A senha do produtor precisa ter no mínimo 10 caracteres.', true);
+    return;
+  }
+
+  setLoginStatus('');
+  setLoadingLogin(true);
+  try {
+    const data = await requestAPI('/auth/register-producer', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password })
+    });
+    aplicarSessao(data.user);
+  } catch(err) {
+    setLoginStatus(err.message || 'Falha ao cadastrar produtor.', true);
+  } finally {
+    setLoadingLogin(false);
+  }
+}
+
 async function voltarLogin() {
   try { await requestAPI('/auth/logout', { method: 'POST' }); } catch(_e) {}
   usuarioLogado = null;
@@ -979,6 +1096,7 @@ async function voltarLogin() {
   document.getElementById('login-screen').style.display = 'flex';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   setLoginStatus('');
+  atualizarLoginUI();
 }
 
 // ═══ LISTA FAMÍLIAS ═══
@@ -1315,7 +1433,11 @@ document.getElementById('login-password').addEventListener('keydown', function(e
 document.getElementById('login-email').addEventListener('keydown', function(e) {
   if(e.key === 'Enter') fazerLogin();
 });
+document.getElementById('register-name').addEventListener('keydown', function(e) {
+  if(e.key === 'Enter') fazerLogin();
+});
 
+atualizarLoginUI();
 iniciarSessaoSeValida();
 </script>
 </body>

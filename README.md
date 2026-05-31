@@ -40,5 +40,8 @@ API: `http://localhost:3333`
 
 - `donato@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (admin)
 - `marcelo@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (coordenador)
-- `raimundo@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (produtor)
-- `pompeu@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (produtor)
+
+## Regras de acesso (MVP atual)
+
+- `Administrador` e `Coordenador`: contas fixas criadas pela equipe de desenvolvimento.
+- `Produtor`: pode se cadastrar na própria tela de login e já entrar em seguida.

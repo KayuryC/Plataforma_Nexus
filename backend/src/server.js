@@ -18,6 +18,7 @@ import {
   findRefreshTokenById,
   findUserByEmail,
   findUserById,
+  insertUser,
   insertRefreshToken,
   revokeRefreshToken
 } from "./db.js";
@@ -42,6 +43,14 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Muitas tentativas. Tente novamente em alguns minutos." }
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000,
+  max: 12,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas de cadastro. Aguarde alguns minutos." }
 });
 
 function cleanUser(user) {
@@ -71,6 +80,20 @@ function requireCsrf(req, res, next) {
     return res.status(403).json({ error: "Requisição bloqueada por proteção CSRF." });
   }
   return next();
+}
+
+function emailValido(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function gerarFamilyId(email) {
+  const base = email
+    .split("@")[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 28);
+  return base || `prod-${Date.now().toString(36)}`;
 }
 
 app.get("/api/health", (_req, res) => {
@@ -108,6 +131,53 @@ app.post("/api/auth/login", loginLimiter, async (req, res) => {
 
   setAuthCookies(res, accessToken, refresh.refreshCookieValue, csrfToken);
   return res.json({ user: cleanUser(user) });
+});
+
+app.post("/api/auth/register-producer", registerLimiter, async (req, res) => {
+  const { name, email, password } = req.body ?? {};
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: "Nome, email e senha são obrigatórios." });
+  }
+
+  if (typeof name !== "string" || typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({ error: "Dados inválidos para cadastro." });
+  }
+
+  const trimmedName = name.trim();
+  const normalizedEmail = email.trim().toLowerCase();
+  if (trimmedName.length < 3 || trimmedName.length > 120 || !emailValido(normalizedEmail)) {
+    return res.status(400).json({ error: "Nome ou email inválido." });
+  }
+  if (password.length < 10 || password.length > 120) {
+    return res.status(400).json({ error: "A senha deve ter entre 10 e 120 caracteres." });
+  }
+
+  const existingUser = findUserByEmail(normalizedEmail);
+  if (existingUser) {
+    return res.status(409).json({ error: "Este email já está cadastrado." });
+  }
+
+  const createdUser = insertUser({
+    email: normalizedEmail,
+    name: trimmedName,
+    role: "produtor",
+    passwordHash: hashPassword(password),
+    familyId: gerarFamilyId(normalizedEmail)
+  });
+
+  const accessToken = generateAccessToken(createdUser);
+  const refresh = buildRefreshSession(createdUser);
+  const csrfToken = generateCsrfToken();
+  insertRefreshToken({
+    id: refresh.jti,
+    userId: createdUser.id,
+    tokenHash: refresh.refreshCookieHash,
+    expiresAt: refresh.expiresAt
+  });
+
+  setAuthCookies(res, accessToken, refresh.refreshCookieValue, csrfToken);
+  return res.status(201).json({ user: cleanUser(createdUser) });
 });
 
 app.post("/api/auth/refresh", requireCsrf, (req, res) => {

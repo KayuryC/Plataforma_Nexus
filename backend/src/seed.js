@@ -11,18 +11,6 @@ const seeds = [
     email: "marcelo@nexus.local",
     name: "Marcelo Heinen",
     role: "coordenador"
-  },
-  {
-    email: "raimundo@nexus.local",
-    name: "Raimundo Nonato Gonçalves",
-    role: "produtor",
-    familyId: "raimundo"
-  },
-  {
-    email: "pompeu@nexus.local",
-    name: "José Maria Pompeu",
-    role: "produtor",
-    familyId: "pompeu"
   }
 ];
 
