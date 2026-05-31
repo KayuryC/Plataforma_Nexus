@@ -142,6 +142,10 @@ input,textarea,select{font-family:'IBM Plex Sans',sans-serif}
 .tab:hover{color:var(--vd)}
 .view{display:none}
 .view.active{display:block}
+.view.active .stat-card,.view.active .alert,.view.active .card{animation:riseIn .35s ease both}
+.view.active .stat-card:nth-child(2){animation-delay:.05s}
+.view.active .stat-card:nth-child(3){animation-delay:.1s}
+.view.active .stat-card:nth-child(4){animation-delay:.15s}
 .card{background:var(--branco);border:1px solid rgba(45,94,53,.1);border-radius:6px;padding:1.5rem}
 .card-sm{padding:1rem 1.2rem}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
@@ -222,6 +226,26 @@ textarea.form-input{resize:vertical;min-height:90px}
 .modal-body{padding:1.6rem}
 .modal-footer{padding:1rem 1.6rem;border-top:1px solid rgba(45,94,53,.1);display:flex;justify-content:flex-end;gap:.7rem}
 .notif{width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0}
+.activity-list{display:flex;flex-direction:column;gap:.5rem}
+.activity-item{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;
+  padding:.6rem .75rem;border:1px solid rgba(45,94,53,.1);border-radius:4px;background:rgba(248,244,234,.6)
+}
+.activity-main{font-size:.78rem;color:var(--terra);line-height:1.4}
+.activity-time{font-size:.7rem;color:var(--cinza);white-space:nowrap}
+.toast-wrap{
+  position:fixed;right:18px;bottom:18px;z-index:300;display:flex;flex-direction:column;gap:.6rem;
+}
+.toast{
+  min-width:240px;max-width:360px;padding:.75rem .95rem;border-radius:6px;
+  background:var(--vd);color:var(--creme);font-size:.8rem;border:1px solid rgba(123,184,104,.3);
+  box-shadow:0 8px 20px rgba(0,0,0,.15);animation:riseIn .22s ease both;
+}
+.toast.warn{background:#5C3018;border-color:rgba(200,137,58,.35)}
+@keyframes riseIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
 /* PRODUTOR PAINEL */
 .prod-hero{background:linear-gradient(135deg,var(--vd) 0%,var(--vm) 100%);border-radius:8px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
@@ -387,6 +411,7 @@ textarea.form-input{resize:vertical;min-height:90px}
     <span class="topbar-title" id="topbar-title">Dashboard</span>
     <div class="topbar-right">
       <span class="tag tag-green" id="topbar-ctx">Vila de Jutaí</span>
+      <span class="tag tag-blue" id="topbar-now">--:--</span>
       <button class="btn btn-primary btn-sm" id="btn-nova-familia" onclick="openModal('modal-nova-familia')">+ Nova Família</button>
     </div>
   </header>
@@ -397,22 +422,22 @@ textarea.form-input{resize:vertical;min-height:90px}
     <div class="view active" id="view-dashboard">
       <div class="grid-4" style="margin-bottom:1.5rem">
         <div class="stat-card">
-          <div class="stat-num">18</div>
+          <div class="stat-num" data-live-stat="18">18</div>
           <div class="stat-label">Famílias cadastradas</div>
           <div class="stat-delta">↑ 6 este mês · Meta: 31</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">14</div>
+          <div class="stat-num" data-live-stat="14">14</div>
           <div class="stat-label">Cadernos atualizados</div>
           <div class="stat-delta">Semana atual · 78%</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">5</div>
+          <div class="stat-num" data-live-stat="5">5</div>
           <div class="stat-label">Alertas da IA</div>
           <div class="stat-delta" style="color:var(--ouro)">Requer atenção</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">245</div>
+          <div class="stat-num" data-live-stat="245">245</div>
           <div class="stat-label">Hectares em SAF</div>
           <div class="stat-delta">Janela 25/26</div>
         </div>
@@ -435,6 +460,10 @@ textarea.form-input{resize:vertical;min-height:90px}
           <div class="alert alert-green">
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
             <div><strong>Família Pompeu</strong> — cupuaçu em florescimento. IA gerou alerta de adubação.</div>
+          </div>
+          <div class="card card-sm">
+            <div class="sec-title" style="font-size:.88rem;margin-bottom:.6rem">Atividade recente</div>
+            <div class="activity-list" id="activity-list"></div>
           </div>
         </div>
         <div>
@@ -533,7 +562,7 @@ textarea.form-input{resize:vertical;min-height:90px}
     <!-- ═══ CADERNOS GERAL ═══ -->
     <div class="view" id="view-caderno">
       <div class="sec-title">Cadernos de Campo — Semana Atual</div>
-      <div class="sec-sub">Registros de todas as famílias · Semana 9 / 2025</div>
+      <div class="sec-sub" id="caderno-subtitle">Registros de todas as famílias · Semana atual</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem" id="cards-caderno"></div>
     </div>
 
@@ -625,7 +654,7 @@ textarea.form-input{resize:vertical;min-height:90px}
         <div class="ia-text">Solo com baixa umidade nos primeiros 10cm combinado a sol forte nos primeiros 3 dias da semana. A mandioca está em fase de tuberização (mês 4), período crítico para a formação das raízes. Irrigação leve antes das 8h por 2-3 dias reduz o risco de estresse hídrico e garante produtividade. Fonte: EMBRAPA Mandioca e Fruticultura.</div>
         <div class="ia-actions">
           <button class="ia-btn" onclick="showView('videos')">Ver vídeo: irrigação na Amazônia</button>
-          <button class="ia-btn" onclick="alert('Alerta enviado para Raimundo Nonato!')">Enviar alerta para produtor</button>
+          <button class="ia-btn" onclick="showToast('Alerta enviado para Raimundo Nonato!');addLiveActivity('Alerta enviado para Raimundo Nonato.');">Enviar alerta para produtor</button>
         </div>
       </div>
       <div class="ia-card" style="background:linear-gradient(135deg,#1a3040 0%,#1a4535 100%)">
@@ -634,7 +663,7 @@ textarea.form-input{resize:vertical;min-height:90px}
         <div class="ia-text">Florescimento registrado indica alta demanda nutricional. Janela ideal para adubação foliar com boro (B) e zinco (Zn) — micronutrientes críticos para fixação dos frutos. Dose recomendada: 2g/L de ácido bórico + 1g/L de sulfato de zinco. Aplicar nas primeiras horas do dia. Fonte: EMBRAPA Amazônia Oriental.</div>
         <div class="ia-actions">
           <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="showView('videos')">Ver técnica de adubação foliar</button>
-          <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="alert('Plano gerado para José Maria Pompeu!')">Gerar plano de manejo</button>
+          <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="showToast('Plano gerado para José Maria Pompeu!');addLiveActivity('Plano de manejo gerado para José Maria Pompeu.');">Gerar plano de manejo</button>
         </div>
       </div>
       <div class="ia-card" style="background:linear-gradient(135deg,#3D2010 0%,#5C3018 100%)">
@@ -643,7 +672,7 @@ textarea.form-input{resize:vertical;min-height:90px}
         <div class="ia-text">Amarelamento internerval nas folhas mais velhas é sintoma clássico de deficiência de magnésio (Mg), comum em latossolos amarelos da Amazônia com pH abaixo de 5,5. Recomendação: calagem com calcário dolomítico (2t/ha) e verificação do pH do solo — ideal entre 5,5 e 6,5. Fonte: EMBRAPA Amazônia Oriental / IAC.</div>
         <div class="ia-actions">
           <button class="ia-btn" style="border-color:rgba(200,137,58,.35);color:var(--ouro)" onclick="showView('videos')">Ver vídeo sobre açaizeiro</button>
-          <button class="ia-btn" style="border-color:rgba(200,137,58,.35);color:var(--ouro)" onclick="alert('Visita técnica agendada!')">Agendar visita técnica</button>
+          <button class="ia-btn" style="border-color:rgba(200,137,58,.35);color:var(--ouro)" onclick="showToast('Visita técnica agendada!');addLiveActivity('Visita técnica agendada para equipe de campo.');">Agendar visita técnica</button>
         </div>
       </div>
       <div class="ia-card" style="background:linear-gradient(135deg,#1C3D22 0%,#2D5E35 100%)">
@@ -652,7 +681,7 @@ textarea.form-input{resize:vertical;min-height:90px}
         <div class="ia-text">O sistema não recebeu registros da família Faustino Alves desde a semana 6. O dendezeiro está em fase de crescimento vegetativo (mês 5), período que exige monitoramento de pragas e fertilização. A ausência de registros pode indicar dificuldades no campo. Recomendação: visita presencial esta semana.</div>
         <div class="ia-actions">
           <button class="ia-btn" onclick="showView('novocaderno')">Registrar visita agora</button>
-          <button class="ia-btn" onclick="alert('Lembrete enviado ao gestor!')">Marcar visita no calendário</button>
+          <button class="ia-btn" onclick="showToast('Lembrete enviado ao gestor!');addLiveActivity('Lembrete de visita marcado no calendário.');">Marcar visita no calendário</button>
         </div>
       </div>
     </div>
@@ -852,6 +881,8 @@ textarea.form-input{resize:vertical;min-height:90px}
   </div>
 </div>
 
+<div class="toast-wrap" id="toast-wrap"></div>
+
 <script>
 // ═══ BANCO DE DADOS FICTÍCIO ═══
 const DB = {
@@ -917,6 +948,119 @@ function setLocalSession(user) {
 
 function clearLocalSession() {
   localStorage.removeItem(LOCAL_SESSION_KEY);
+}
+
+const LIVE_ACTIVITIES = [];
+const ACTIVITY_TEXTS = [
+  'Foto de caderno recebida para análise',
+  'IA sugeriu ajuste de irrigação',
+  'Visita de campo registrada pelo gestor',
+  'Produtor concluiu registro semanal',
+  'Novo alerta de solo compactado identificado',
+  'Vídeo didático recomendado para produtor',
+  'Revisão de ficha técnica concluída'
+];
+
+function formatDatePtBR(date) {
+  return new Intl.DateTimeFormat('pt-BR').format(date);
+}
+
+function formatTimePtBR(date = new Date()) {
+  return new Intl.DateTimeFormat('pt-BR', { hour:'2-digit', minute:'2-digit' }).format(date);
+}
+
+function dateDaysAgo(days) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
+}
+
+function getCurrentWeekInfo() {
+  const today = new Date();
+  const firstJan = new Date(today.getFullYear(), 0, 1);
+  const dayMs = 24 * 60 * 60 * 1000;
+  const week = Math.ceil((((today - firstJan) / dayMs) + firstJan.getDay() + 1) / 7);
+  return { week, year: today.getFullYear() };
+}
+
+function updateTopbarClock() {
+  const el = document.getElementById('topbar-now');
+  if(!el) return;
+  el.textContent = `Atualizado ${formatTimePtBR()}`;
+}
+
+function showToast(message, kind = 'info') {
+  const wrap = document.getElementById('toast-wrap');
+  if(!wrap) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${kind === 'warn' ? 'warn' : ''}`.trim();
+  toast.textContent = message;
+  wrap.prepend(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(6px)';
+    setTimeout(() => toast.remove(), 220);
+  }, 2600);
+}
+
+function addLiveActivity(text) {
+  LIVE_ACTIVITIES.unshift({ text, at: formatTimePtBR() });
+  if(LIVE_ACTIVITIES.length > 5) LIVE_ACTIVITIES.length = 5;
+  renderLiveActivities();
+}
+
+function renderLiveActivities() {
+  const list = document.getElementById('activity-list');
+  if(!list) return;
+  if(!LIVE_ACTIVITIES.length) {
+    list.innerHTML = `<div style="font-size:.76rem;color:var(--cinza)">Aguardando novos eventos...</div>`;
+    return;
+  }
+  list.innerHTML = LIVE_ACTIVITIES.map(item => `
+    <div class="activity-item">
+      <div class="activity-main">${item.text}</div>
+      <span class="activity-time">${item.at}</span>
+    </div>
+  `).join('');
+}
+
+function startLiveActivityTicker() {
+  if(!LIVE_ACTIVITIES.length) addLiveActivity('Plataforma ativa e monitorando registros.');
+  setInterval(() => {
+    const base = ACTIVITY_TEXTS[Math.floor(Math.random() * ACTIVITY_TEXTS.length)];
+    addLiveActivity(base);
+  }, 12000);
+}
+
+function animateValue(el, target) {
+  const targetNum = Number(String(target).replace(/[^\d.-]/g, ''));
+  if(!el || Number.isNaN(targetNum)) return;
+  const start = 0;
+  const duration = 650;
+  const t0 = performance.now();
+  const hasDot = String(target).includes('.');
+  function tick(now) {
+    const p = Math.min((now - t0) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const value = start + ((targetNum - start) * eased);
+    el.textContent = hasDot ? value.toFixed(1) : Math.round(value).toString();
+    if(p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function animateDashboardStats() {
+  document.querySelectorAll('[data-live-stat]').forEach(el => {
+    if(el.dataset.animated === '1') return;
+    el.dataset.animated = '1';
+    animateValue(el, el.dataset.liveStat);
+  });
+}
+
+function updateTemporalLabels() {
+  const info = getCurrentWeekInfo();
+  const sub = document.getElementById('caderno-subtitle');
+  if(sub) sub.textContent = `Registros de todas as famílias · Semana ${info.week} / ${info.year}`;
 }
 
 function setLoginStatus(msg, isError = false) {
@@ -1120,12 +1264,15 @@ async function fazerLogin() {
       if(!user) throw new Error('Credenciais inválidas.');
       setLocalSession(user);
       aplicarSessao(user);
+      showToast(`Bem-vindo, ${user.name.split(' ')[0]}!`);
+      addLiveActivity(`${user.name.split(' ')[0]} acessou a plataforma.`);
     } else {
       const data = await requestAPI('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password, perfil })
       });
       aplicarSessao(data.user);
+      showToast(`Sessão iniciada para ${data.user.name.split(' ')[0]}.`);
     }
   } catch (err) {
     setLoginStatus(err.message || 'Falha no login. Verifique suas credenciais.', true);
@@ -1155,12 +1302,15 @@ async function cadastrarUsuario() {
       const user = cadastrarLocal({ name, email, password, role });
       setLocalSession(user);
       aplicarSessao(user);
+      showToast('Cadastro realizado com sucesso!');
+      addLiveActivity(`Novo ${role === 'admin' ? 'administrador' : 'produtor'} cadastrado.`);
     } else if(role === 'produtor') {
       const data = await requestAPI('/auth/register-producer', {
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
       aplicarSessao(data.user);
+      showToast('Cadastro concluído com sucesso!');
     } else {
       throw new Error('Cadastro de administrador no modo API ainda não está habilitado.');
     }
@@ -1184,6 +1334,7 @@ async function voltarLogin() {
   setLoginStatus('');
   atualizarLoginUI();
   document.getElementById('register-name').value = '';
+  showToast('Sessão encerrada.');
 }
 
 // ═══ LISTA FAMÍLIAS ═══
@@ -1258,7 +1409,7 @@ function showFicha(id) {
       <div class="caderno-week-header" onclick="toggleWeek(this)">
         <span class="week-label">Semana ${f.semana} — Atual</span>
         <div style="display:flex;align-items:center;gap:.8rem">
-          <span class="week-date">12/05/2025</span>
+          <span class="week-date">${formatDatePtBR(dateDaysAgo(2))}</span>
           <span class="tag tag-green" style="font-size:.68rem">Enviado</span>
           <span>▾</span>
         </div>
@@ -1279,7 +1430,7 @@ function showFicha(id) {
     <div class="caderno-week">
       <div class="caderno-week-header" onclick="toggleWeek(this)">
         <span class="week-label">Semana ${f.semana-1}</span>
-        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">05/05/2025</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▸</span></div>
+        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">${formatDatePtBR(dateDaysAgo(9))}</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▸</span></div>
       </div>
       <div class="caderno-week-body" style="display:none">
         <div class="obs-grid">
@@ -1299,8 +1450,8 @@ function showFicha(id) {
       <div class="ia-text">Com base nos dados registrados na semana ${f.semana}, identificamos: ${f.desafio.toLowerCase()}. Para o contexto de ${f.solo} e culturas de ${f.culturas.split(',')[0]}, a recomendação é monitoramento semanal e aplicação preventiva conforme orientação técnica da EMBRAPA Amazônia Oriental. A ausência de intervenção pode reduzir a produtividade estimada em até 30%.</div>
       <div class="ia-actions">
         <button class="ia-btn" onclick="showView('videos')">Ver vídeo relacionado</button>
-        <button class="ia-btn" onclick="alert('Plano gerado para ${f.nome}!')">Gerar plano semanal</button>
-        <button class="ia-btn" onclick="alert('Marcado como resolvido!')">Marcar como resolvido</button>
+        <button class="ia-btn" onclick="showToast('Plano gerado para ${f.nome}!');addLiveActivity('Plano semanal gerado para ${f.nome}.');">Gerar plano semanal</button>
+        <button class="ia-btn" onclick="showToast('Marcado como resolvido!');addLiveActivity('Ocorrência marcada como resolvida para ${f.nome}.');">Marcar como resolvido</button>
       </div>
     </div>`;
 
@@ -1367,7 +1518,7 @@ function renderProdIA() {
       <div class="ia-text">Com base no que você registrou no caderno essa semana, identificamos: ${f.desafio.toLowerCase()}. Para o tipo de solo ${f.solo} e suas culturas de ${f.culturas.split(',')[0]}, a recomendação é: monitoramento semanal e intervenção conforme orientação técnica. Fonte: EMBRAPA Amazônia Oriental.</div>
       <div class="ia-actions">
         <button class="ia-btn" onclick="showView('videos')">Ver vídeo explicativo</button>
-        <button class="ia-btn" onclick="alert('Donato foi notificado!')">Chamar o gestor</button>
+        <button class="ia-btn" onclick="showToast('Gestor notificado com sucesso.');addLiveActivity('Produtor solicitou suporte do gestor.');">Chamar o gestor</button>
       </div>
     </div>
     <div class="ia-card" style="background:linear-gradient(135deg,#1a3040 0%,#1a4535 100%)">
@@ -1386,7 +1537,7 @@ function renderProdCaderno() {
     <div class="caderno-week">
       <div class="caderno-week-header" onclick="toggleWeek(this)">
         <span class="week-label">Semana ${f.semana} — Atual</span>
-        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">12/05/2025</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▾</span></div>
+        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">${formatDatePtBR(dateDaysAgo(2))}</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▾</span></div>
       </div>
       <div class="caderno-week-body">
         <div class="obs-grid">
@@ -1404,7 +1555,7 @@ function renderProdCaderno() {
     <div class="caderno-week">
       <div class="caderno-week-header" onclick="toggleWeek(this)">
         <span class="week-label">Semana ${f.semana-1}</span>
-        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">05/05/2025</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▸</span></div>
+        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">${formatDatePtBR(dateDaysAgo(9))}</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▸</span></div>
       </div>
       <div class="caderno-week-body" style="display:none">
         <div class="obs-grid">
@@ -1436,6 +1587,9 @@ function showView(id) {
   const btn = document.querySelector(`.sb-item[onclick*="'${id}'"]`);
   if(btn) btn.classList.add('active');
   document.getElementById('topbar-title').textContent = titles[id] || id;
+  if(id === 'dashboard') animateDashboardStats();
+  if(id === 'caderno') updateTemporalLabels();
+  updateTopbarClock();
   window.scrollTo(0,0);
 }
 
@@ -1465,11 +1619,13 @@ document.querySelectorAll('.modal-wrap').forEach(m => {
 
 function cadastrarFamilia() {
   closeModal('modal-nova-familia');
-  alert('Família cadastrada com sucesso! Será exibida na lista em breve.');
+  showToast('Família cadastrada com sucesso!');
+  addLiveActivity('Nova família cadastrada no sistema.');
 }
 
 function salvarRegistro() {
-  alert('Registro salvo! A IA analisará os dados e gerará recomendações em breve.');
+  showToast('Registro salvo! A IA analisará os dados em seguida.');
+  addLiveActivity('Novo registro de caderno salvo.');
   showView('ia');
 }
 
@@ -1498,10 +1654,11 @@ function previewFotoProd(input) {
 function enviarFotoProd() {
   const img = document.getElementById('foto-preview-img-prod').src;
   if(!img || img === window.location.href) {
-    alert('Selecione uma foto do caderno antes de enviar.');
+    showToast('Selecione uma foto do caderno antes de enviar.', 'warn');
     return;
   }
-  alert('Foto enviada com sucesso! Nossa IA está analisando seu caderno. Você receberá as recomendações em breve.');
+  showToast('Foto enviada com sucesso! IA em análise.');
+  addLiveActivity('Foto do caderno enviada para análise de IA.');
   showView('prod-ia');
 }
 
@@ -1531,6 +1688,10 @@ document.getElementById('register-name').addEventListener('keydown', function(e)
   if(e.key === 'Enter') fazerLogin();
 });
 
+updateTemporalLabels();
+updateTopbarClock();
+setInterval(updateTopbarClock, 30000);
+startLiveActivityTicker();
 atualizarLoginUI();
 iniciarSessaoSeValida();
 </script>
