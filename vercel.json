@@ -1,3 +1,21 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/api/health",
+      "destination": "/api/nexus?path=health"
+    },
+    {
+      "source": "/api/auth/:path*",
+      "destination": "/api/nexus?path=auth/:path*"
+    },
+    {
+      "source": "/api/admin/:path*",
+      "destination": "/api/nexus?path=admin/:path*"
+    },
+    {
+      "source": "/api/producers/:path*",
+      "destination": "/api/nexus?path=producers/:path*"
+    }
+  ]
 }

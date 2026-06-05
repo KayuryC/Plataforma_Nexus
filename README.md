@@ -7,7 +7,7 @@ Plataforma de gestão de famílias e produção agrícola da comunidade de Jutai
 - `index.html`: entrada da Vercel; redireciona para o app.
 - `plataformanexus.html`: frontend do app (admin e produtor).
 - `backend/`: API de autenticação real (Express + JSON local + JWT em cookie HttpOnly).
-- `api/[...path].js`: API serverless de autenticação e produtores para demo na Vercel.
+- `api/nexus.js` + `lib/nexus-vercel-api.js`: API serverless de autenticação e produtores para demo na Vercel.
 - `api/ia.js`: função Edge para recomendações com IA (pronta para Vercel).
 - `vercel.json`: configuração de URLs limpas para a Vercel.
 
