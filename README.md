@@ -4,10 +4,11 @@ Plataforma de gestão de famílias e produção agrícola da comunidade de Jutai
 
 ## Estrutura atual
 
-- `plataformanexus.html`: frontend protótipo (admin e produtor).
+- `index.html`: entrada da Vercel; redireciona para o app.
+- `plataformanexus.html`: frontend do app (admin e produtor).
 - `backend/`: API de autenticação real (Express + JSON local + JWT em cookie HttpOnly).
 - `api/ia.js`: função Edge para recomendações com IA (pronta para Vercel).
-- `vercel.json`: rota `/` apontando para `plataformanexus.html`.
+- `vercel.json`: configuração de URLs limpas para a Vercel.
 
 ## Como rodar para demo/feira
 
@@ -45,6 +46,7 @@ npm run dev
 API: `http://localhost:3333`
 
 6. Rode o frontend (ex: Live Server):
+- `http://localhost:5500/`
 - `http://localhost:5500/plataformanexus.html`
 
 Na tela:
