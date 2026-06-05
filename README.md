@@ -7,6 +7,7 @@ Plataforma de gestão de famílias e produção agrícola da comunidade de Jutai
 - `index.html`: entrada da Vercel; redireciona para o app.
 - `plataformanexus.html`: frontend do app (admin e produtor).
 - `backend/`: API de autenticação real (Express + JSON local + JWT em cookie HttpOnly).
+- `api/[...path].js`: API serverless de autenticação e produtores para demo na Vercel.
 - `api/ia.js`: função Edge para recomendações com IA (pronta para Vercel).
 - `vercel.json`: configuração de URLs limpas para a Vercel.
 
@@ -86,6 +87,17 @@ Endpoints novos do MVP:
 - Recomendado para monorepo:
   - projeto frontend com Root Directory `.`
   - projeto backend com Root Directory `backend`
+
+### API serverless da demo
+
+O deploy atual inclui rotas serverless para login, cadastro de produtor, perfil e listagem do administrador. Elas usam memória do runtime da Vercel para permitir o teste da feira sem contratar banco ainda.
+
+Variáveis de produção necessárias:
+
+- `SEED_DEFAULT_PASSWORD`: senha combinada para Donato e Marcelo.
+- `NEXUS_AUTH_SECRET`: segredo forte para assinatura dos cookies de sessão.
+
+Para produção definitiva, troque o armazenamento em memória da função por um banco persistente.
 
 ## IA Edge (novo)
 
