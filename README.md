@@ -9,24 +9,15 @@ Plataforma de gestão de famílias e produção agrícola da comunidade de Jutai
 - `api/ia.js`: função Edge para recomendações com IA (pronta para Vercel).
 - `vercel.json`: rota `/` apontando para `plataformanexus.html`.
 
-## Como rodar (modo simples)
+## Como rodar para demo/feira
 
-Atualmente o login/cadastro está em modo simples no frontend (`localStorage`), para acelerar desenvolvimento:
+O frontend agora usa o backend por padrão (`nexus-auth-mode="api"`):
 
-- Administrador: pode cadastrar e fazer login
-- Produtor: pode cadastrar e fazer login
-- Os dados ficam salvos no navegador local (não é multiusuário real)
+- Administrador: apenas login com as contas Donato ou Marcelo
+- Produtor: cria conta pela tela inicial
+- O administrador vê os produtores cadastrados no painel, na lista de famílias e nos cadernos
 
-Para abrir:
-
-1. Rode o frontend (ex: Live Server):
-- `http://localhost:5500/plataformanexus.html`
-
-## Backend (opcional por enquanto)
-
-Se quiser testar o backend também, mantenha estes passos:
-
-1. Instale dependências:
+1. Instale dependências do backend:
 ```bash
 cd backend
 npm install
@@ -36,34 +27,51 @@ npm install
 ```bash
 cp .env.example .env
 ```
-Importante:
-- defina `JWT_ACCESS_SECRET` e `JWT_REFRESH_SECRET` com segredos fortes (>=32 chars)
-- defina `SEED_DEFAULT_PASSWORD` com senha forte (>=12 chars)
 
-3. Gere usuários de desenvolvimento:
+3. Edite `.env` e defina:
+- `JWT_ACCESS_SECRET` e `JWT_REFRESH_SECRET` com segredos fortes (>=32 chars)
+- mantenha `SEED_DEFAULT_PASSWORD` com a senha combinada para a feira
+
+4. Gere o administrador/coordenador de desenvolvimento:
 ```bash
-export SEED_DEFAULT_PASSWORD='SUA_SENHA_FORTE_AQUI'
 npm run seed
 ```
 
-4. Suba a API:
+5. Suba a API:
 ```bash
 npm run dev
 ```
 
 API: `http://localhost:3333`
 
-5. Rode o frontend:
+6. Rode o frontend (ex: Live Server):
 - `http://localhost:5500/plataformanexus.html`
+
+Na tela:
+- Entre como administrador/coordenador usando as credenciais informadas aos representantes
+- Em outra aba/dispositivo, selecione Produtor, faça cadastro e complete os dados da propriedade
+- O painel do administrador atualiza periodicamente e mostra novos produtores
+
+Se o backend não estiver rodando, o frontend ativa automaticamente um modo demo local para a interface não travar durante a apresentação. Nesse modo os dados ficam apenas no navegador atual; para ver cadastros entre dispositivos/abas reais, mantenha a API em `http://localhost:3333`.
+
+## Backend e dados
+
+O backend deixou de ser opcional para o fluxo multiusuário da feira. Ele persiste usuários, perfis de produtores e registros de envio de caderno em `backend/data/nexus.json`.
+
+Endpoints novos do MVP:
+- `GET /api/admin/producers`: administrador lista produtores cadastrados
+- `GET /api/producers/me`: produtor carrega seu perfil
+- `PATCH /api/producers/me`: produtor atualiza dados da propriedade
+- `POST /api/producers/me/caderno`: produtor registra envio de caderno/foto
 
 ## Usuários de desenvolvimento
 
-- `donato@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (admin)
-- `marcelo@nexus.local` / senha definida em `SEED_DEFAULT_PASSWORD` (coordenador)
+- `donato@nexus.local` (admin)
+- `marcelo@nexus.local` (coordenador)
 
 ## Regras de acesso (MVP atual)
 
-- Administrador: cadastro e login pela tela.
+- Administrador: apenas login pela tela; cadastro desativado.
 - Produtor: cadastro e login pela tela.
 
 ## Deploy na Vercel

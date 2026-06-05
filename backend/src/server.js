@@ -16,11 +16,14 @@ import {
 import { config } from "./config.js";
 import {
   findRefreshTokenById,
+  findProducerProfileByUserId,
   findUserByEmail,
   findUserById,
   insertUser,
   insertRefreshToken,
-  revokeRefreshToken
+  listProducerProfiles,
+  revokeRefreshToken,
+  updateProducerProfileByUserId
 } from "./db.js";
 import { hashPassword, verifyPassword } from "./password.js";
 
@@ -73,6 +76,22 @@ function authFromAccessCookie(req) {
   }
 }
 
+function requireAuth(req, res, next) {
+  const payload = authFromAccessCookie(req);
+  if (!payload?.sub) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+  req.auth = payload;
+  return next();
+}
+
+function requireAdmin(req, res, next) {
+  if (req.auth?.role !== "admin" && req.auth?.role !== "coordenador") {
+    return res.status(403).json({ error: "Acesso restrito ao administrador." });
+  }
+  return next();
+}
+
 function requireCsrf(req, res, next) {
   const csrfCookie = req.cookies?.nexus_csrf;
   const csrfHeader = req.get("x-csrf-token");
@@ -94,6 +113,41 @@ function gerarFamilyId(email) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 28);
   return base || `prod-${Date.now().toString(36)}`;
+}
+
+function clampNumber(value, fallback, min, max) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.min(max, Math.max(min, numeric));
+}
+
+function cleanText(value, fallback = "", max = 160) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  return text ? text.slice(0, max) : fallback;
+}
+
+function getAuthenticatedUser(req, res) {
+  const user = findUserById(Number(req.auth?.sub));
+  if (!user || !user.isActive) {
+    res.status(401).json({ error: "Usuário inválido." });
+    return null;
+  }
+  return user;
+}
+
+function profilePatchFromBody(body = {}) {
+  return {
+    responsavel: cleanText(body.responsavel, undefined),
+    filhos: clampNumber(body.filhos, undefined, 0, 20),
+    ha: clampNumber(body.ha, undefined, 0, 500),
+    culturas: cleanText(body.culturas, undefined, 180),
+    solo: cleanText(body.solo, undefined, 120),
+    agua: cleanText(body.agua, undefined, 120),
+    localizacao: cleanText(body.localizacao, undefined, 180),
+    desafio: cleanText(body.desafio, undefined, 240),
+    membros: clampNumber(body.membros, undefined, 1, 50),
+    cadastroStatus: "ativo"
+  };
 }
 
 app.get("/api/health", (_req, res) => {
@@ -177,7 +231,63 @@ app.post("/api/auth/register-producer", registerLimiter, async (req, res) => {
   });
 
   setAuthCookies(res, accessToken, refresh.refreshCookieValue, csrfToken);
-  return res.status(201).json({ user: cleanUser(createdUser) });
+  return res.status(201).json({
+    user: cleanUser(createdUser),
+    familia: findProducerProfileByUserId(createdUser.id)
+  });
+});
+
+app.get("/api/admin/producers", requireAuth, requireAdmin, (_req, res) => {
+  return res.json({
+    familias: listProducerProfiles(),
+    generatedAt: new Date().toISOString()
+  });
+});
+
+app.get("/api/producers/me", requireAuth, (req, res) => {
+  const user = getAuthenticatedUser(req, res);
+  if (!user) return;
+  if (user.role !== "produtor") {
+    return res.status(403).json({ error: "Este perfil não é de produtor." });
+  }
+
+  return res.json({ familia: findProducerProfileByUserId(user.id) });
+});
+
+app.patch("/api/producers/me", requireAuth, requireCsrf, (req, res) => {
+  const user = getAuthenticatedUser(req, res);
+  if (!user) return;
+  if (user.role !== "produtor") {
+    return res.status(403).json({ error: "Este perfil não é de produtor." });
+  }
+
+  const profile = updateProducerProfileByUserId(user.id, profilePatchFromBody(req.body ?? {}));
+  return res.json({ familia: profile });
+});
+
+app.post("/api/producers/me/caderno", requireAuth, requireCsrf, (req, res) => {
+  const user = getAuthenticatedUser(req, res);
+  if (!user) return;
+  if (user.role !== "produtor") {
+    return res.status(403).json({ error: "Este perfil não é de produtor." });
+  }
+
+  const current = findProducerProfileByUserId(user.id);
+  if (!current) return res.status(404).json({ error: "Perfil de produtor não encontrado." });
+
+  const now = new Date().toISOString();
+  const note = cleanText(req.body?.note, "Foto do caderno enviada pelo produtor.", 220);
+  const nextEngagement = Math.min(100, Math.max(Number(current.engajamento || 0), 35) + 8);
+  const profile = updateProducerProfileByUserId(user.id, {
+    semana: clampNumber(req.body?.semana, current.semana, 1, 52),
+    status: "ativo",
+    engajamento: nextEngagement,
+    cadastroStatus: current.cadastroStatus === "novo" ? "ativo" : current.cadastroStatus,
+    lastRecordAt: now,
+    lastRecordNote: note
+  });
+
+  return res.status(201).json({ familia: profile });
 });
 
 app.post("/api/auth/refresh", requireCsrf, (req, res) => {

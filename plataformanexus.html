@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="nexus-api-base" content="__AUTO__"/>
-<meta name="nexus-auth-mode" content="local"/>
+<meta name="nexus-auth-mode" content="api"/>
 <meta name="nexus-ai-endpoint" content="__AUTO__"/>
 <title>Nexus — Plataforma</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -123,7 +123,9 @@ input,textarea,select{font-family:'IBM Plex Sans',sans-serif}
 /* MAIN */
 .main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column}
 .topbar{background:var(--branco);border-bottom:1px solid rgba(45,94,53,.1);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
-.topbar-title{font-family:'Lora',serif;font-size:1.1rem;font-weight:600;color:var(--vd)}
+.topbar-main{display:flex;flex-direction:column;gap:.18rem;min-width:0}
+.topbar-section{font-size:.62rem;text-transform:uppercase;letter-spacing:.14em;font-weight:600;color:var(--vf)}
+.topbar-title{font-family:'Lora',serif;font-size:1.1rem;font-weight:600;color:var(--vd);line-height:1.2}
 .topbar-right{display:flex;align-items:center;gap:.8rem}
 .tag{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;padding:.3rem .8rem;border-radius:2px;font-weight:500}
 .tag-green{background:rgba(74,140,85,.1);color:var(--vf)}
@@ -285,6 +287,8 @@ textarea.form-input{resize:vertical;min-height:90px}
 
   .main{margin-left:64px}
   .topbar{padding:.8rem 1rem;flex-wrap:wrap;gap:.6rem}
+  .topbar-main{width:100%}
+  .topbar-section{font-size:.58rem}
   .topbar-title{font-size:1rem}
   .topbar-right{width:100%;justify-content:flex-start;flex-wrap:wrap;gap:.45rem}
   .content{padding:1rem}
@@ -307,7 +311,7 @@ textarea.form-input{resize:vertical;min-height:90px}
   .sidebar{
     width:100%;
     min-width:100%;
-    height:calc(64px + env(safe-area-inset-bottom));
+    height:calc(76px + env(safe-area-inset-bottom));
     padding-bottom:env(safe-area-inset-bottom);
     top:auto;
     bottom:0;
@@ -327,23 +331,54 @@ textarea.form-input{resize:vertical;min-height:90px}
   }
   .sb-nav::-webkit-scrollbar{display:none}
   .sb-item{
-    flex:0 0 64px;
-    width:64px;
-    height:64px;
+    flex:0 0 78px;
+    width:78px;
+    height:76px;
     padding:0;
+    flex-direction:column;
+    gap:.28rem;
     justify-content:center;
     border-left:none;
-    border-top:2px solid transparent;
+    border-top:3px solid transparent;
+    font-size:.66rem;
+    line-height:1.1;
+    text-align:center;
   }
+  .sb-item svg{width:18px;height:18px}
+  .sb-item > span:not(.sb-badge):not(.notif){
+    display:block;
+    max-width:72px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .sb-item .sb-badge,.sb-item .notif{display:none}
   .sb-item.active{
     border-left:none;
     border-top-color:var(--vl);
     background:rgba(123,184,104,.12);
   }
 
-  .main{margin-left:0;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
-  .grid-3,.grid-4{grid-template-columns:1fr}
-  .card,.stat-card,.ia-card{padding:1rem}
+  .main{margin-left:0;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .topbar{
+    padding:.85rem 1rem .75rem;
+    align-items:flex-start;
+    border-bottom:1px solid rgba(45,94,53,.14);
+    box-shadow:0 1px 0 rgba(255,255,255,.85);
+  }
+  .topbar-main{
+    padding-left:.75rem;
+    border-left:3px solid var(--vf);
+  }
+  .topbar-title{font-size:1.18rem}
+  .topbar-right{gap:.45rem}
+  .grid-3{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}
+  .card,.ia-card{padding:1rem}
+  .stat-card{padding:.9rem;min-height:116px}
+  .stat-num{font-size:1.65rem;line-height:1}
+  .stat-label{font-size:.76rem;line-height:1.35}
+  .stat-delta{font-size:.7rem;line-height:1.35}
   .prod-hero{padding:1.2rem}
   .prod-hero-nome{font-size:1.25rem}
   .prod-status-grid{grid-template-columns:1fr}
@@ -363,15 +398,20 @@ textarea.form-input{resize:vertical;min-height:90px}
   .login-logo{font-size:1.9rem}
   .login-sub{font-size:.72rem}
   .login-label{margin-bottom:.55rem}
-  .topbar{padding:.7rem .85rem}
-  #topbar-ctx{display:none}
+  .topbar{padding:.82rem .9rem .72rem}
+  #topbar-ctx{display:inline-flex}
   .tag{font-size:.62rem;letter-spacing:.08em;padding:.25rem .55rem}
-  .content{padding:.85rem}
+  .content{padding:.75rem}
   .sec-title{font-size:.95rem}
-  .stat-num{font-size:1.6rem}
   .modal{max-height:84vh}
   .modal-footer{flex-wrap:wrap}
   .modal-footer .btn{width:100%}
+}
+
+@media(max-width:380px){
+  .grid-4{grid-template-columns:1fr}
+  .sb-item{flex-basis:72px;width:72px}
+  .sb-item > span:not(.sb-badge):not(.notif){max-width:66px}
 }
 </style>
 </head>
@@ -512,7 +552,10 @@ textarea.form-input{resize:vertical;min-height:90px}
 <!-- MAIN CONTENT -->
 <main class="main">
   <header class="topbar">
-    <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <div class="topbar-main">
+      <span class="topbar-section" id="topbar-section">Visão Geral</span>
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+    </div>
     <div class="topbar-right">
       <span class="tag tag-green" id="topbar-ctx">Vila de Jutaí</span>
       <span class="tag tag-blue" id="topbar-now">--:--</span>
@@ -886,6 +929,26 @@ textarea.form-input{resize:vertical;min-height:90px}
           <div id="prod-ultima-ia"></div>
         </div>
       </div>
+      <div class="card" id="prod-form-card" style="margin-top:1.5rem">
+        <div class="sec-title">Atualizar cadastro da propriedade</div>
+        <div class="grid-2">
+          <div class="form-group"><label class="form-label">Área total (hectares)</label><input class="form-input" id="prod-form-ha" type="number" min="0" step="0.1" placeholder="Ex: 3.5"/></div>
+          <div class="form-group"><label class="form-label">Membros da família</label><input class="form-input" id="prod-form-membros" type="number" min="1" placeholder="Ex: 5"/></div>
+          <div class="form-group"><label class="form-label">Filhos em idade escolar</label><input class="form-input" id="prod-form-filhos" type="number" min="0" placeholder="Ex: 2"/></div>
+          <div class="form-group"><label class="form-label">Localização / ramal</label><input class="form-input" id="prod-form-localizacao" type="text" placeholder="Ramal do Açaí, km 3"/></div>
+          <div class="form-group"><label class="form-label">Culturas principais</label><input class="form-input" id="prod-form-culturas" type="text" placeholder="Mandioca, Açaí, Cupuaçu"/></div>
+          <div class="form-group">
+            <label class="form-label">Tipo de solo</label>
+            <select class="form-input form-select" id="prod-form-solo"><option>Não informado</option><option>Latossolo amarelo</option><option>Argissolo vermelho-amarelo</option><option>Terra preta de índio</option><option>Gleissolo (várzea)</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Água / irrigação</label>
+            <select class="form-input form-select" id="prod-form-agua"><option>Não informado</option><option>Igarapé próximo</option><option>Poço artesiano</option><option>Sem irrigação</option><option>Chuva apenas</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Desafio atual</label><input class="form-input" id="prod-form-desafio" type="text" placeholder="Ex: solo seco, pragas, adubação"/></div>
+        </div>
+        <button class="btn btn-primary" id="btn-salvar-perfil-prod" onclick="salvarPerfilProdutor()">Salvar dados da propriedade</button>
+      </div>
     </div>
 
     <!-- ═══ PRODUTOR — IA ═══ -->
@@ -1023,7 +1086,7 @@ function resolveApiBase() {
   const fromMeta = document.querySelector('meta[name="nexus-api-base"]')?.content?.trim();
   if(fromMeta && fromMeta !== '__AUTO__') return fromMeta.replace(/\/+$/,'');
 
-  const isLocal = ['localhost','127.0.0.1'].includes(window.location.hostname);
+  const isLocal = ['localhost','127.0.0.1',''].includes(window.location.hostname) || window.location.protocol === 'file:';
   if(isLocal) return 'http://localhost:3333/api';
   return `${window.location.origin}/api`;
 }
@@ -1032,21 +1095,138 @@ function resolveAIEndpoint() {
   const fromMeta = document.querySelector('meta[name="nexus-ai-endpoint"]')?.content?.trim();
   if(fromMeta && fromMeta !== '__AUTO__') return fromMeta;
 
-  const isLocal = ['localhost','127.0.0.1'].includes(window.location.hostname);
+  const isLocal = ['localhost','127.0.0.1',''].includes(window.location.hostname) || window.location.protocol === 'file:';
   if(isLocal) return 'http://localhost:3000/api/ia';
   return `${window.location.origin}/api/ia`;
 }
 
 const API_BASE = resolveApiBase();
 const AI_ENDPOINT = resolveAIEndpoint();
-const AUTH_MODE = (document.querySelector('meta[name="nexus-auth-mode"]')?.content || 'local').toLowerCase();
+const REQUESTED_AUTH_MODE = (document.querySelector('meta[name="nexus-auth-mode"]')?.content || 'local').toLowerCase();
+let AUTH_MODE = REQUESTED_AUTH_MODE;
 const LOCAL_USERS_KEY = 'nexus_users_v1';
 const LOCAL_SESSION_KEY = 'nexus_session_v1';
 const MEMORY_AUTH_STORE = { users: [], session: null };
 const AI_TIMEOUT_MS = 18000;
+const DEMO_ADMIN_USERS = [
+  { id:'demo_admin_donato', name:'Donato Silva', email:'donato@nexus.local', password:'NexusFeira2026!', role:'admin', familyId:null },
+  { id:'demo_coord_marcelo', name:'Marcelo Heinen', email:'marcelo@nexus.local', password:'NexusFeira2026!', role:'coordenador', familyId:null }
+];
+let adminSyncTimer = null;
+let adminKnownProducerIds = null;
+let adminSyncInFlight = false;
 
 function safeParseJson(raw, fallback) {
   try { return JSON.parse(raw); } catch(_e) { return fallback; }
+}
+
+function isBackendConnectionError(err) {
+  return !!err?.backendOffline;
+}
+
+function ensureDemoAdminUsers() {
+  const users = getLocalUsers();
+  let changed = false;
+  DEMO_ADMIN_USERS.forEach(seed => {
+    if(!users.some(u => u.email === seed.email)) {
+      users.push({ ...seed, createdAt: new Date().toISOString(), demoUser: true });
+      changed = true;
+    }
+  });
+  if(changed) setLocalUsers(users);
+}
+
+function ativarModoDemoLocal(reason = '') {
+  if(AUTH_MODE === 'local') return;
+  AUTH_MODE = 'local';
+  pararSincronizacaoAdmin();
+  ensureDemoAdminUsers();
+  atualizarLoginUI();
+  const msg = reason
+    ? `Backend indisponível (${reason}). Ativei o modo demo local.`
+    : 'Backend indisponível. Ativei o modo demo local.';
+  showToast(msg, 'warn');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+function asNumber(value, fallback = 0) {
+  if(value === '' || value === null || value === undefined) return fallback;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : fallback;
+}
+
+function siglaFromName(nome) {
+  return String(nome || 'Produtor')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0,2)
+    .map(p => p[0])
+    .join('')
+    .toUpperCase() || 'PR';
+}
+
+function normalizarFamilia(raw = {}, fromApi = false) {
+  const nome = raw.nome || raw.name || 'Produtor';
+  const id = raw.id || raw.familyId || slugFromEmail(raw.email) || gerarIdUsuario();
+  return {
+    id,
+    sigla: raw.sigla || siglaFromName(nome),
+    nome,
+    responsavel: raw.responsavel || nome,
+    filhos: asNumber(raw.filhos, 0),
+    ha: asNumber(raw.ha, 0),
+    culturas: raw.culturas || 'Cadastro iniciado',
+    solo: raw.solo || 'Não informado',
+    agua: raw.agua || 'Não informado',
+    semana: asNumber(raw.semana, 1),
+    status: raw.status || 'regular',
+    engajamento: asNumber(raw.engajamento, 0),
+    localizacao: raw.localizacao || 'Cadastro realizado na feira',
+    desafio: raw.desafio || 'Completar dados técnicos da propriedade',
+    treinamento: raw.treinamento || 'Pendente',
+    membros: asNumber(raw.membros, 1),
+    cadastroStatus: raw.cadastroStatus || 'novo',
+    lastRecordAt: raw.lastRecordAt || null,
+    lastRecordNote: raw.lastRecordNote || null,
+    email: raw.email || '',
+    fromApi
+  };
+}
+
+function upsertFamilia(familia) {
+  const normalizada = normalizarFamilia(familia, !!familia.fromApi);
+  const idx = DB.familias.findIndex(f => f.id === normalizada.id);
+  if(idx >= 0) DB.familias[idx] = { ...DB.familias[idx], ...normalizada };
+  else DB.familias.unshift(normalizada);
+  return normalizada;
+}
+
+function syncLocalProducerAccounts() {
+  getLocalUsers()
+    .filter(u => u.role === 'produtor')
+    .forEach(u => {
+      if(!DB.familias.some(f => f.id === u.familyId)) {
+        criarPerfilProdutorBasico(u);
+      }
+    });
+}
+
+function mergeApiFamilias(familias = []) {
+  const apiFamilias = familias.map(item => normalizarFamilia(item, true));
+  const apiIds = new Set(apiFamilias.map(f => f.id));
+  DB.familias = [
+    ...apiFamilias,
+    ...DB.familias.filter(f => !f.fromApi && !apiIds.has(f.id))
+  ];
+  return apiFamilias;
 }
 
 function getLocalUsers() {
@@ -1160,8 +1340,8 @@ function renderLiveActivities() {
   }
   list.innerHTML = LIVE_ACTIVITIES.map(item => `
     <div class="activity-item">
-      <div class="activity-main">${item.text}</div>
-      <span class="activity-time">${item.at}</span>
+      <div class="activity-main">${escapeHtml(item.text)}</div>
+      <span class="activity-time">${escapeHtml(item.at)}</span>
     </div>
   `).join('');
 }
@@ -1238,12 +1418,74 @@ async function requestAPI(path, options = {}) {
       ...options
     });
   } catch(_err) {
-    throw new Error(`Não consegui conectar com o backend em ${API_BASE}.`);
+    const err = new Error('Backend indisponível. Ativando modo demo local quando possível.');
+    err.backendOffline = true;
+    throw err;
   }
   const isJson = resp.headers.get('content-type')?.includes('application/json');
   const body = isJson ? await resp.json() : {};
   if(!resp.ok) throw new Error(body.error || 'Não foi possível concluir a requisição.');
   return body;
+}
+
+function atualizarIndicadoresAdmin() {
+  const total = DB.familias.length;
+  const cadernos = DB.familias.filter(f => f.lastRecordAt || f.semana >= 8).length;
+  const alertas = DB.familias.filter(f => f.status === 'atencao' || f.cadastroStatus === 'novo').length;
+  const hectares = DB.familias.reduce((sum, f) => sum + asNumber(f.ha, 0), 0);
+  const stats = document.querySelectorAll('#view-dashboard .stat-num');
+  const valores = [total, cadernos, alertas, hectares.toFixed(hectares % 1 ? 1 : 0)];
+  stats.forEach((el, idx) => {
+    if(valores[idx] === undefined) return;
+    el.dataset.liveStat = String(valores[idx]);
+    if(el.dataset.animated === '1') el.textContent = String(valores[idx]);
+  });
+}
+
+function renderAdminViews() {
+  if(AUTH_MODE === 'local') syncLocalProducerAccounts();
+  renderListaFamilias();
+  renderCardsCaderno();
+  atualizarIndicadoresAdmin();
+}
+
+async function sincronizarAdminComApi(silent = true) {
+  if(AUTH_MODE === 'local' || adminSyncInFlight) {
+    if(AUTH_MODE === 'local') renderAdminViews();
+    return;
+  }
+
+  adminSyncInFlight = true;
+  try {
+    const data = await requestAPI('/admin/producers');
+    const apiFamilias = mergeApiFamilias(data.familias || []);
+    const incomingIds = new Set(apiFamilias.map(f => f.id));
+    if(adminKnownProducerIds) {
+      const novos = apiFamilias.filter(f => !adminKnownProducerIds.has(f.id));
+      novos.forEach(f => addLiveActivity(`Novo produtor cadastrado: ${f.nome}.`));
+      if(novos.length) showToast(`${novos.length} novo(s) produtor(es) apareceram no painel.`);
+    }
+    adminKnownProducerIds = incomingIds;
+    renderAdminViews();
+  } catch (err) {
+    if(!silent) showToast(err.message || 'Não foi possível atualizar produtores.', 'warn');
+  } finally {
+    adminSyncInFlight = false;
+  }
+}
+
+function iniciarSincronizacaoAdmin() {
+  if(adminSyncTimer) clearInterval(adminSyncTimer);
+  sincronizarAdminComApi(false);
+  if(AUTH_MODE !== 'local') {
+    adminSyncTimer = setInterval(() => sincronizarAdminComApi(true), 7000);
+  }
+}
+
+function pararSincronizacaoAdmin() {
+  if(adminSyncTimer) clearInterval(adminSyncTimer);
+  adminSyncTimer = null;
+  adminKnownProducerIds = null;
 }
 
 async function requestAIEdge(payload) {
@@ -1290,11 +1532,20 @@ function gerarIdUsuario() {
 }
 
 function loginLocal(email, password, roleEsperada) {
-  const user = getLocalUsers().find(u => u.email === email && u.password === password && u.role === roleEsperada);
+  const user = getLocalUsers().find(u => {
+    if(roleEsperada === 'admin' && !DEMO_ADMIN_USERS.some(seed => seed.email === u.email)) return false;
+    const roleOk = roleEsperada === 'admin'
+      ? (u.role === 'admin' || u.role === 'coordenador')
+      : u.role === roleEsperada;
+    return u.email === email && u.password === password && roleOk;
+  });
   return user || null;
 }
 
 function cadastrarLocal({ name, email, password, role }) {
+  if(role === 'admin' || role === 'coordenador') {
+    throw new Error('Cadastro de administrador desativado. Use Donato ou Marcelo.');
+  }
   const users = getLocalUsers();
   if(users.some(u => u.email === email)) throw new Error('Esse email já está cadastrado.');
   const user = {
@@ -1332,10 +1583,14 @@ function criarPerfilProdutorBasico(usuario) {
     localizacao: 'Cadastro inicial',
     desafio: 'Concluir cadastro técnico da propriedade',
     treinamento: 'Pendente',
-    membros: 1
+    membros: 1,
+    cadastroStatus: 'novo',
+    lastRecordAt: null,
+    lastRecordNote: null,
+    email: usuario?.email || '',
+    fromApi: false
   };
-  DB.familias.push(perfilBasico);
-  return perfilBasico;
+  return upsertFamilia(perfilBasico);
 }
 
 function fallbackRecomendacaoProdutor(f) {
@@ -1403,25 +1658,51 @@ async function gerarRecomendacaoIAProdutor() {
   }
 }
 
+async function carregarPerfilProdutorApi() {
+  if(AUTH_MODE === 'local') return;
+  try {
+    const data = await requestAPI('/producers/me');
+    if(data?.familia) {
+      produtorAtual = upsertFamilia({ ...data.familia, fromApi: true });
+      renderProdHome();
+      renderProdIA();
+      renderProdCaderno();
+    }
+  } catch (err) {
+    if(isBackendConnectionError(err)) {
+      ativarModoDemoLocal('API local fora do ar');
+      return;
+    }
+    showToast(err.message || 'Não foi possível carregar seu perfil.', 'warn');
+  }
+}
+
 function atualizarLoginUI() {
   const tipoTxt = perfil === 'admin' ? 'administrador' : 'produtor';
   const emCadastro = modoCadastro;
   const wrapNome = document.getElementById('cadastro-nome-wrap');
   const btnToggle = document.getElementById('btn-toggle-cadastro');
   const help = document.getElementById('login-help-text');
+  const adminLoginOnly = perfil === 'admin';
+  if(adminLoginOnly && modoCadastro) modoCadastro = false;
+  const mostrandoCadastro = modoCadastro && !adminLoginOnly;
 
-  if(wrapNome) wrapNome.style.display = emCadastro ? 'block' : 'none';
+  if(wrapNome) wrapNome.style.display = mostrandoCadastro ? 'block' : 'none';
   if(btnToggle) {
-    btnToggle.classList.remove('hidden');
-    btnToggle.textContent = emCadastro ? `Já tenho conta de ${tipoTxt}` : `Quero me cadastrar como ${tipoTxt}`;
+    btnToggle.classList.toggle('hidden', adminLoginOnly);
+    if(!adminLoginOnly) {
+      btnToggle.textContent = emCadastro ? `Já tenho conta de ${tipoTxt}` : `Quero me cadastrar como ${tipoTxt}`;
+    }
   }
   if(help) {
     const storageMsg = AUTH_MODE === 'local'
       ? 'Modo simples ativo: dados salvos no navegador.'
-      : 'Modo API ativo.';
-    help.innerHTML = emCadastro
+      : 'Modo API ativo: produtores cadastrados aparecem para o administrador.';
+    help.innerHTML = mostrandoCadastro
       ? `Cadastro de <strong>${tipoTxt}</strong>. ${storageMsg}`
-      : `Login de <strong>${tipoTxt}</strong>. ${storageMsg}`;
+      : adminLoginOnly
+        ? `Login de <strong>administrador</strong>. Acesso restrito aos representantes credenciados.`
+        : `Login de <strong>${tipoTxt}</strong>. ${storageMsg}`;
   }
   if(!document.getElementById('btn-login-submit').disabled) setLoadingLogin(false);
 }
@@ -1429,6 +1710,7 @@ function atualizarLoginUI() {
 // ═══ LOGIN ═══
 function selectPerfil(p) {
   perfil = p;
+  if(p === 'admin') modoCadastro = false;
   document.getElementById('card-admin').classList.toggle('selected', p==='admin');
   document.getElementById('card-produtor').classList.toggle('selected', p==='produtor');
   setLoginStatus('');
@@ -1436,12 +1718,18 @@ function selectPerfil(p) {
 }
 
 function alternarModoCadastro() {
+  if(perfil === 'admin') {
+    modoCadastro = false;
+    setLoginStatus('Administrador entra apenas com login. Use Donato ou Marcelo.', false);
+    atualizarLoginUI();
+    return;
+  }
   modoCadastro = !modoCadastro;
   setLoginStatus('');
   atualizarLoginUI();
 }
 
-function aplicarSessao(usuario) {
+function aplicarSessao(usuario, extras = {}) {
   usuarioLogado = usuario || null;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
@@ -1457,13 +1745,15 @@ function aplicarSessao(usuario) {
     document.getElementById('sb-avatar-txt').textContent = nome.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
     document.getElementById('sb-name-txt').textContent = nome;
     document.getElementById('sb-role-txt').textContent = roleTxt;
-    renderListaFamilias();
-    renderCardsCaderno();
+    iniciarSincronizacaoAdmin();
     showView('dashboard');
   } else {
     const emailId = (usuario?.email || '').split('@')[0];
-    produtorAtual = DB.familias.find(f => f.id === usuario?.familyId) || DB.familias.find(f => f.id === emailId);
+    produtorAtual = extras.familia
+      ? upsertFamilia({ ...extras.familia, fromApi: AUTH_MODE !== 'local' })
+      : DB.familias.find(f => f.id === usuario?.familyId) || DB.familias.find(f => f.id === emailId);
     if(!produtorAtual) produtorAtual = criarPerfilProdutorBasico(usuario);
+    pararSincronizacaoAdmin();
     document.getElementById('sidebar-admin').style.display = 'none';
     document.getElementById('sidebar-produtor').style.display = 'flex';
     document.getElementById('btn-nova-familia').style.display = 'none';
@@ -1473,6 +1763,7 @@ function aplicarSessao(usuario) {
     renderProdIA();
     renderProdCaderno();
     showView('prod-home');
+    if(AUTH_MODE !== 'local' && !extras.familia) carregarPerfilProdutorApi();
   }
 }
 
@@ -1494,6 +1785,7 @@ async function fazerLogin() {
   try {
     const roleEsperada = perfil === 'admin' ? 'admin' : 'produtor';
     if(AUTH_MODE === 'local') {
+      ensureDemoAdminUsers();
       const user = loginLocal(email, password, roleEsperada);
       if(!user) throw new Error('Credenciais inválidas.');
       setLocalSession(user);
@@ -1505,10 +1797,25 @@ async function fazerLogin() {
         method: 'POST',
         body: JSON.stringify({ email, password, perfil })
       });
-      aplicarSessao(data.user);
+      aplicarSessao(data.user, { familia: data.familia });
       showToast(`Sessão iniciada para ${data.user.name.split(' ')[0]}.`);
     }
   } catch (err) {
+    if(isBackendConnectionError(err)) {
+      ativarModoDemoLocal('API local fora do ar');
+      try {
+        const roleEsperada = perfil === 'admin' ? 'admin' : 'produtor';
+        const user = loginLocal(email, password, roleEsperada);
+        if(!user) throw new Error('Backend fora do ar. Use uma conta já cadastrada no modo demo local ou cadastre um produtor.');
+        setLocalSession(user);
+        aplicarSessao(user);
+        showToast(`Entrando em modo demo como ${user.name.split(' ')[0]}.`);
+        return;
+      } catch(localErr) {
+        setLoginStatus(localErr.message || 'Modo demo ativo, mas as credenciais locais não foram encontradas.', true);
+        return;
+      }
+    }
     setLoginStatus(err.message || 'Falha no login. Verifique suas credenciais.', true);
   } finally {
     setLoadingLogin(false);
@@ -1516,6 +1823,12 @@ async function fazerLogin() {
 }
 
 async function cadastrarUsuario() {
+  if(perfil === 'admin') {
+    modoCadastro = false;
+    atualizarLoginUI();
+    setLoginStatus('Cadastro de administrador desativado. Use Donato ou Marcelo.', true);
+    return;
+  }
   const name = document.getElementById('register-name').value.trim();
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
@@ -1523,32 +1836,47 @@ async function cadastrarUsuario() {
     setLoginStatus('Preencha nome, email e senha para cadastrar.', true);
     return;
   }
-  if(password.length < 6) {
-    setLoginStatus('Use uma senha com pelo menos 6 caracteres.', true);
+  const minPassword = AUTH_MODE === 'local' ? 6 : 10;
+  if(password.length < minPassword) {
+    setLoginStatus(`Use uma senha com pelo menos ${minPassword} caracteres.`, true);
     return;
   }
 
   setLoginStatus('');
   setLoadingLogin(true);
   try {
-    const role = perfil === 'admin' ? 'admin' : 'produtor';
+    const role = 'produtor';
     if(AUTH_MODE === 'local') {
+      ensureDemoAdminUsers();
       const user = cadastrarLocal({ name, email, password, role });
       setLocalSession(user);
       aplicarSessao(user);
       showToast('Cadastro realizado com sucesso!');
       addLiveActivity(`Novo ${role === 'admin' ? 'administrador' : 'produtor'} cadastrado.`);
-    } else if(role === 'produtor') {
+    } else {
       const data = await requestAPI('/auth/register-producer', {
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
-      aplicarSessao(data.user);
+      aplicarSessao(data.user, { familia: data.familia });
       showToast('Cadastro concluído com sucesso!');
-    } else {
-      throw new Error('Cadastro de administrador no modo API ainda não está habilitado.');
     }
   } catch(err) {
+    if(isBackendConnectionError(err)) {
+      ativarModoDemoLocal('API local fora do ar');
+      try {
+        const role = 'produtor';
+        const user = cadastrarLocal({ name, email, password, role });
+        setLocalSession(user);
+        aplicarSessao(user);
+        showToast('Cadastro salvo em modo demo local.');
+        addLiveActivity(`Novo ${role === 'admin' ? 'administrador' : 'produtor'} cadastrado no modo demo.`);
+        return;
+      } catch(localErr) {
+        setLoginStatus(localErr.message || 'Modo demo ativo, mas não foi possível cadastrar.', true);
+        return;
+      }
+    }
     setLoginStatus(err.message || 'Falha ao cadastrar usuário.', true);
   } finally {
     setLoadingLogin(false);
@@ -1556,6 +1884,7 @@ async function cadastrarUsuario() {
 }
 
 async function voltarLogin() {
+  pararSincronizacaoAdmin();
   if(AUTH_MODE !== 'local') {
     try { await requestAPI('/auth/logout', { method: 'POST' }); } catch(_e) {}
   } else {
@@ -1575,19 +1904,25 @@ async function voltarLogin() {
 function renderListaFamilias() {
   const cont = document.getElementById('lista-familias');
   cont.innerHTML = '';
+  if(!DB.familias.length) {
+    cont.innerHTML = `<div class="card"><div class="sec-title">Nenhum produtor cadastrado ainda</div><div class="sec-sub" style="margin:0">Assim que um produtor criar conta, ele aparece aqui.</div></div>`;
+    return;
+  }
   DB.familias.forEach(f => {
     const statusLabel = f.status==='ativo' ? 'Ativo' : f.status==='regular' ? 'Regular' : 'Atenção';
     const statusClass = f.status==='ativo' ? 'tag-green' : f.status==='regular' ? 'tag-blue' : 'tag-amber';
     const dotClass = f.status==='ativo' ? 'dot-green' : f.status==='regular' ? 'dot-gray' : 'dot-amber';
     const filhosTxt = f.filhos > 0 ? `${f.filhos} filhos em idade escolar` : 'Produtor direto';
+    const novoCadastro = f.cadastroStatus === 'novo';
     cont.innerHTML += `
       <div class="family-row" onclick="showFicha('${f.id}')">
-        <div class="fam-avatar">${f.sigla}</div>
+        <div class="fam-avatar">${escapeHtml(f.sigla)}</div>
         <div>
-          <div class="fam-name">${f.nome}</div>
-          <div class="fam-meta">${filhosTxt} · ${f.ha} ha · ${f.culturas.split(',')[0]}</div>
+          <div class="fam-name">${escapeHtml(f.nome)}</div>
+          <div class="fam-meta">${escapeHtml(filhosTxt)} · ${escapeHtml(f.ha)} ha · ${escapeHtml(f.culturas.split(',')[0])}</div>
         </div>
         <div class="fam-status">
+          ${novoCadastro ? '<span class="tag tag-amber" style="font-size:.68rem">Novo cadastro</span>' : ''}
           <span class="tag ${statusClass}" style="font-size:.68rem">${statusLabel}</span>
           <div class="dot ${dotClass}"></div>
         </div>
@@ -1604,7 +1939,15 @@ function showFicha(id) {
   document.getElementById('ficha-sub').textContent = f.responsavel + ' · Responsável';
   document.getElementById('ficha-semana').textContent = String(f.semana).padStart(2,'0');
   const tagsEl = document.getElementById('ficha-tags');
-  tagsEl.innerHTML = [f.ha + ' hectares', f.culturas.split(',')[0].trim(), f.agua, f.solo.split(' ')[0]].map(t => `<span class="ficha-tag">${t}</span>`).join('');
+  tagsEl.innerHTML = [f.ha + ' hectares', f.culturas.split(',')[0].trim(), f.agua, f.solo.split(' ')[0]].map(t => `<span class="ficha-tag">${escapeHtml(t)}</span>`).join('');
+  const safeResponsavel = escapeHtml(f.responsavel);
+  const safeLocalizacao = escapeHtml(f.localizacao);
+  const safeTreinamento = escapeHtml(f.treinamento);
+  const safeCulturas = escapeHtml(f.culturas);
+  const safeCulturaPrincipal = escapeHtml(f.culturas.split(',')[0].trim());
+  const safeSolo = escapeHtml(f.solo);
+  const safeAgua = escapeHtml(f.agua);
+  const safeDesafio = escapeHtml(f.desafio);
 
   // Tab dados
   document.getElementById('tab-dados').innerHTML = `
@@ -1612,11 +1955,11 @@ function showFicha(id) {
       <div class="card">
         <div class="sec-title">Dados da Família</div>
         <table style="width:100%;font-size:.85rem;border-collapse:collapse">
-          <tr><td style="color:var(--cinza);padding:.4rem 0;width:140px">Responsável</td><td style="font-weight:500">${f.responsavel}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0;width:140px">Responsável</td><td style="font-weight:500">${safeResponsavel}</td></tr>
           <tr><td style="color:var(--cinza);padding:.4rem 0">Membros</td><td>${f.membros} pessoas</td></tr>
           <tr><td style="color:var(--cinza);padding:.4rem 0">Filhos na escola</td><td>${f.filhos > 0 ? f.filhos + ' filhos (Ens. Fundamental)' : 'Não tem filhos escolares'}</td></tr>
-          <tr><td style="color:var(--cinza);padding:.4rem 0">Localização</td><td>${f.localizacao}</td></tr>
-          <tr><td style="color:var(--cinza);padding:.4rem 0">Treinamentos</td><td>${f.treinamento}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Localização</td><td>${safeLocalizacao}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Treinamentos</td><td>${safeTreinamento}</td></tr>
           <tr><td style="color:var(--cinza);padding:.4rem 0">Engajamento</td><td><span style="font-weight:600;color:${f.engajamento>70?'var(--vf)':'var(--ouro)'}">${f.engajamento}%</span></td></tr>
         </table>
       </div>
@@ -1624,10 +1967,10 @@ function showFicha(id) {
         <div class="sec-title">Dados da Propriedade</div>
         <table style="width:100%;font-size:.85rem;border-collapse:collapse">
           <tr><td style="color:var(--cinza);padding:.4rem 0;width:140px">Área total</td><td style="font-weight:500">${f.ha} hectares</td></tr>
-          <tr><td style="color:var(--cinza);padding:.4rem 0">Culturas</td><td>${f.culturas}</td></tr>
-          <tr><td style="color:var(--cinza);padding:.4rem 0">Tipo de solo</td><td>${f.solo}</td></tr>
-          <tr><td style="color:var(--cinza);padding:.4rem 0">Água / irrigação</td><td>${f.agua}</td></tr>
-          <tr><td style="color:var(--cinza);padding:.4rem 0">Desafio atual</td><td>${f.desafio}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Culturas</td><td>${safeCulturas}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Tipo de solo</td><td>${safeSolo}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Água / irrigação</td><td>${safeAgua}</td></tr>
+          <tr><td style="color:var(--cinza);padding:.4rem 0">Desafio atual</td><td>${safeDesafio}</td></tr>
           <tr><td style="color:var(--cinza);padding:.4rem 0">Semana atual</td><td>Semana ${f.semana} de 24</td></tr>
         </table>
       </div>
@@ -1653,7 +1996,7 @@ function showFicha(id) {
           <div class="obs-item"><div class="obs-label">Condição do Solo</div><div class="obs-value">${f.solo.includes('amarelo') ? 'Solo seco na área do dendê. Baixa umidade nos primeiros 10cm.' : 'Boa umidade. Solo em condições ideais.'}</div></div>
           <div class="obs-item"><div class="obs-label">Clima da Semana</div><div class="obs-value">Sol forte segunda e terça. Chuva fraca quinta-feira à tarde.</div></div>
           <div class="obs-item"><div class="obs-label">Atividades Realizadas</div><div class="obs-value">Capina manual nas entrelinhas. Adubação de cobertura em 1.0 ha.</div></div>
-          <div class="obs-item"><div class="obs-label">Observações / Dúvidas</div><div class="obs-value">${f.desafio}. Consultou caderno módulo 2.</div></div>
+          <div class="obs-item"><div class="obs-label">Observações / Dúvidas</div><div class="obs-value">${safeDesafio}. Consultou caderno módulo 2.</div></div>
         </div>
         <div style="margin-top:1rem;display:flex;align-items:center;gap:.8rem">
           <div class="foto-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A8C55" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
@@ -1680,12 +2023,12 @@ function showFicha(id) {
   document.getElementById('tab-ia').innerHTML = `
     <div class="ia-card">
       <div class="ia-badge">IA · Análise automática · Semana ${f.semana}</div>
-      <div class="ia-title">${f.desafio} — análise e recomendação</div>
-      <div class="ia-text">Com base nos dados registrados na semana ${f.semana}, identificamos: ${f.desafio.toLowerCase()}. Para o contexto de ${f.solo} e culturas de ${f.culturas.split(',')[0]}, a recomendação é monitoramento semanal e aplicação preventiva conforme orientação técnica da EMBRAPA Amazônia Oriental. A ausência de intervenção pode reduzir a produtividade estimada em até 30%.</div>
+      <div class="ia-title">${safeDesafio} — análise e recomendação</div>
+      <div class="ia-text">Com base nos dados registrados na semana ${f.semana}, identificamos: ${escapeHtml(String(f.desafio).toLowerCase())}. Para o contexto de ${safeSolo} e culturas de ${safeCulturaPrincipal}, a recomendação é monitoramento semanal e aplicação preventiva conforme orientação técnica da EMBRAPA Amazônia Oriental. A ausência de intervenção pode reduzir a produtividade estimada em até 30%.</div>
       <div class="ia-actions">
         <button class="ia-btn" onclick="showView('videos')">Ver vídeo relacionado</button>
-        <button class="ia-btn" onclick="showToast('Plano gerado para ${f.nome}!');addLiveActivity('Plano semanal gerado para ${f.nome}.');">Gerar plano semanal</button>
-        <button class="ia-btn" onclick="showToast('Marcado como resolvido!');addLiveActivity('Ocorrência marcada como resolvida para ${f.nome}.');">Marcar como resolvido</button>
+        <button class="ia-btn" onclick="showToast('Plano gerado para produtor.');addLiveActivity('Plano semanal gerado para produtor.');">Gerar plano semanal</button>
+        <button class="ia-btn" onclick="showToast('Marcado como resolvido!');addLiveActivity('Ocorrência marcada como resolvida para produtor.');">Marcar como resolvido</button>
       </div>
     </div>`;
 
@@ -1698,16 +2041,17 @@ function renderCardsCaderno() {
   const cont = document.getElementById('cards-caderno');
   if(!cont) return;
   cont.innerHTML = '';
-  DB.familias.slice(0,6).forEach(f => {
-    const enviado = f.semana >= 8;
+  DB.familias.slice(0,8).forEach(f => {
+    const enviado = !!f.lastRecordAt || f.semana >= 8;
     const cor = enviado ? 'var(--vf)' : 'var(--ouro)';
+    const statusTxt = enviado ? `Enviado · sem. ${f.semana}` : f.cadastroStatus === 'novo' ? 'Novo cadastro · aguardando caderno' : `Pendente · sem. ${f.semana}`;
     cont.innerHTML += `
       <div class="card" style="border-top:3px solid ${cor}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem">
-          <div><div style="font-weight:500;font-size:.9rem">${f.nome.split(' ').slice(0,2).join(' ')}</div><div style="font-size:.75rem;color:var(--cinza)">${enviado?'Enviado · '+f.semana+'/5':'Pendente · sem. '+f.semana}</div></div>
+          <div><div style="font-weight:500;font-size:.9rem">${escapeHtml(f.nome.split(' ').slice(0,2).join(' '))}</div><div style="font-size:.75rem;color:var(--cinza)">${escapeHtml(statusTxt)}</div></div>
           <span class="dot ${enviado?'dot-green':'dot-amber'}"></span>
         </div>
-        <div style="font-size:.82rem;color:var(--cinza);line-height:1.6">${f.desafio} · ${f.ha}ha</div>
+        <div style="font-size:.82rem;color:var(--cinza);line-height:1.6">${escapeHtml(f.desafio)} · ${escapeHtml(f.ha)}ha</div>
         <div style="margin-top:1rem;display:flex;gap:.6rem">
           <button class="btn btn-ghost btn-sm" onclick="showFicha('${f.id}')">Ver ficha</button>
           <button class="btn btn-primary btn-sm" onclick="showView('ia')">Analisar IA</button>
@@ -1717,6 +2061,91 @@ function renderCardsCaderno() {
 }
 
 // ═══ PAINEL PRODUTOR ═══
+function setSelectValue(id, value) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const exists = Array.from(el.options).some(opt => opt.value === value || opt.textContent === value);
+  if(!exists && value) {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = value;
+    el.appendChild(opt);
+  }
+  el.value = value || 'Não informado';
+}
+
+function preencherFormularioProdutor() {
+  if(!produtorAtual) return;
+  const setVal = (id, value) => {
+    const el = document.getElementById(id);
+    if(el) el.value = value ?? '';
+  };
+  setVal('prod-form-ha', produtorAtual.ha || '');
+  setVal('prod-form-membros', produtorAtual.membros || 1);
+  setVal('prod-form-filhos', produtorAtual.filhos || 0);
+  setVal('prod-form-localizacao', produtorAtual.localizacao || '');
+  setVal('prod-form-culturas', produtorAtual.culturas || '');
+  setSelectValue('prod-form-solo', produtorAtual.solo || 'Não informado');
+  setSelectValue('prod-form-agua', produtorAtual.agua || 'Não informado');
+  setVal('prod-form-desafio', produtorAtual.desafio || '');
+}
+
+function coletarFormularioProdutor() {
+  const val = id => document.getElementById(id)?.value?.trim() || '';
+  return {
+    ha: asNumber(val('prod-form-ha'), 0),
+    membros: asNumber(val('prod-form-membros'), 1),
+    filhos: asNumber(val('prod-form-filhos'), 0),
+    localizacao: val('prod-form-localizacao') || 'Cadastro realizado na feira',
+    culturas: val('prod-form-culturas') || 'Cadastro iniciado',
+    solo: val('prod-form-solo') || 'Não informado',
+    agua: val('prod-form-agua') || 'Não informado',
+    desafio: val('prod-form-desafio') || 'Completar dados técnicos da propriedade'
+  };
+}
+
+async function salvarPerfilProdutor() {
+  if(!produtorAtual) return;
+  const btn = document.getElementById('btn-salvar-perfil-prod');
+  const payload = coletarFormularioProdutor();
+  if(btn) {
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+  }
+  try {
+    if(AUTH_MODE === 'local') {
+      produtorAtual = upsertFamilia({ ...produtorAtual, ...payload, cadastroStatus:'ativo', engajamento: Math.max(produtorAtual.engajamento || 0, 35) });
+    } else {
+      const data = await requestAPI('/producers/me', {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      });
+      produtorAtual = upsertFamilia({ ...data.familia, fromApi: true });
+    }
+    renderProdHome();
+    renderProdIA();
+    renderProdCaderno();
+    showToast('Cadastro da propriedade atualizado.');
+    addLiveActivity(`Cadastro atualizado por ${produtorAtual.nome.split(' ')[0]}.`);
+  } catch (err) {
+    if(isBackendConnectionError(err)) {
+      ativarModoDemoLocal('API local fora do ar');
+      produtorAtual = upsertFamilia({ ...produtorAtual, ...payload, cadastroStatus:'ativo', engajamento: Math.max(produtorAtual.engajamento || 0, 35) });
+      renderProdHome();
+      renderProdIA();
+      renderProdCaderno();
+      showToast('Cadastro salvo em modo demo local.', 'warn');
+      return;
+    }
+    showToast(err.message || 'Não foi possível salvar o cadastro.', 'warn');
+  } finally {
+    if(btn) {
+      btn.disabled = false;
+      btn.textContent = 'Salvar dados da propriedade';
+    }
+  }
+}
+
 function renderProdHome() {
   const f = produtorAtual;
   document.getElementById('prod-hero-nome').textContent = f.nome;
@@ -1727,38 +2156,43 @@ function renderProdHome() {
     <div class="prod-stat"><div class="prod-stat-num">${f.engajamento}%</div><div class="prod-stat-lbl">Engajamento</div></div>
     <div class="prod-stat"><div class="prod-stat-num">3</div><div class="prod-stat-lbl">Alertas IA</div></div>`;
   document.getElementById('prod-dados-table').innerHTML = `
-    <tr><td style="color:var(--cinza);padding:.4rem 0;width:130px">Responsável</td><td style="font-weight:500">${f.responsavel}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0;width:130px">Responsável</td><td style="font-weight:500">${escapeHtml(f.responsavel)}</td></tr>
     <tr><td style="color:var(--cinza);padding:.4rem 0">Área total</td><td>${f.ha} hectares</td></tr>
-    <tr><td style="color:var(--cinza);padding:.4rem 0">Culturas</td><td>${f.culturas}</td></tr>
-    <tr><td style="color:var(--cinza);padding:.4rem 0">Solo</td><td>${f.solo}</td></tr>
-    <tr><td style="color:var(--cinza);padding:.4rem 0">Localização</td><td>${f.localizacao}</td></tr>
-    <tr><td style="color:var(--cinza);padding:.4rem 0">Treinamento</td><td>${f.treinamento}</td></tr>`;
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Culturas</td><td>${escapeHtml(f.culturas)}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Solo</td><td>${escapeHtml(f.solo)}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Localização</td><td>${escapeHtml(f.localizacao)}</td></tr>
+    <tr><td style="color:var(--cinza);padding:.4rem 0">Treinamento</td><td>${escapeHtml(f.treinamento)}</td></tr>`;
   document.getElementById('prod-ultima-ia').innerHTML = `
     <div class="ia-card" style="margin:0">
       <div class="ia-badge">IA · Semana ${f.semana}</div>
-      <div class="ia-title">${f.desafio}</div>
+      <div class="ia-title">${escapeHtml(f.desafio)}</div>
       <div class="ia-text" style="font-size:.8rem">Análise baseada no seu último caderno enviado. Clique em Recomendações da IA para ver o detalhe completo.</div>
       <div class="ia-actions"><button class="ia-btn" onclick="showView('prod-ia')">Ver recomendações completas</button></div>
     </div>`;
+  preencherFormularioProdutor();
 }
 
 function renderProdIA() {
   const f = produtorAtual;
   document.getElementById('prod-ia-sub').textContent = 'Análises para ' + f.nome + ' · Semana ' + f.semana;
+  const safeDesafio = escapeHtml(f.desafio);
+  const safeSolo = escapeHtml(f.solo);
+  const culturaPrincipal = f.culturas.split(',')[0].trim();
+  const safeCulturaPrincipal = escapeHtml(culturaPrincipal);
   document.getElementById('prod-ia-cards').innerHTML = `
     <div class="ia-card" style="background:linear-gradient(135deg,#15311e 0%,#205e34 100%)">
       <div class="ia-badge">IA Edge · Recomendação ao vivo</div>
       <div class="ia-title">Análise personalizada para sua propriedade</div>
-      <div class="ia-text" id="prod-ia-edge-text">${ultimaIAEdgeProd || 'Toque no botão abaixo para gerar uma recomendação nova com IA Edge.'}</div>
-      <div class="ia-edge-note" id="prod-ia-edge-meta">${ultimaIAEdgeProdMeta}</div>
+      <div class="ia-text" id="prod-ia-edge-text">${escapeHtml(ultimaIAEdgeProd || 'Toque no botão abaixo para gerar uma recomendação nova com IA Edge.')}</div>
+      <div class="ia-edge-note" id="prod-ia-edge-meta">${escapeHtml(ultimaIAEdgeProdMeta)}</div>
       <div class="ia-actions">
         <button class="ia-btn" id="btn-ia-edge-prod" onclick="gerarRecomendacaoIAProdutor()">Gerar recomendação com IA Edge</button>
       </div>
     </div>
     <div class="ia-card">
       <div class="ia-badge">IA · Análise do seu caderno · Semana ${f.semana}</div>
-      <div class="ia-title">${f.desafio} — o que fazer</div>
-      <div class="ia-text">Com base no que você registrou no caderno essa semana, identificamos: ${f.desafio.toLowerCase()}. Para o tipo de solo ${f.solo} e suas culturas de ${f.culturas.split(',')[0]}, a recomendação é: monitoramento semanal e intervenção conforme orientação técnica. Fonte: EMBRAPA Amazônia Oriental.</div>
+      <div class="ia-title">${safeDesafio} — o que fazer</div>
+      <div class="ia-text">Com base no que você registrou no caderno essa semana, identificamos: ${escapeHtml(String(f.desafio).toLowerCase())}. Para o tipo de solo ${safeSolo} e suas culturas de ${safeCulturaPrincipal}, a recomendação é: monitoramento semanal e intervenção conforme orientação técnica. Fonte: EMBRAPA Amazônia Oriental.</div>
       <div class="ia-actions">
         <button class="ia-btn" onclick="showView('videos')">Ver vídeo explicativo</button>
         <button class="ia-btn" onclick="showToast('Gestor notificado com sucesso.');addLiveActivity('Produtor solicitou suporte do gestor.');">Chamar o gestor</button>
@@ -1766,10 +2200,10 @@ function renderProdIA() {
     </div>
     <div class="ia-card" style="background:linear-gradient(135deg,#1a3040 0%,#1a4535 100%)">
       <div class="ia-badge" style="color:#7FC8E8">IA · Dica da semana</div>
-      <div class="ia-title">Como cuidar do seu ${f.culturas.split(',')[0].trim()} nessa época do ano</div>
-      <div class="ia-text">No período de ${new Date().getMonth()<6?'chuvas':'seca'}, o ${f.culturas.split(',')[0].trim()} precisa de atenção especial. Verifique as folhas semanalmente e registre qualquer alteração no caderno. O Donato vai analisar seus registros e trazer orientações personalizadas na próxima visita.</div>
+      <div class="ia-title">Como cuidar do seu ${safeCulturaPrincipal} nessa época do ano</div>
+      <div class="ia-text">No período de ${new Date().getMonth()<6?'chuvas':'seca'}, o ${safeCulturaPrincipal} precisa de atenção especial. Verifique as folhas semanalmente e registre qualquer alteração no caderno. O Donato vai analisar seus registros e trazer orientações personalizadas na próxima visita.</div>
       <div class="ia-actions">
-        <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="showView('videos')">Ver vídeo sobre ${f.culturas.split(',')[0].trim()}</button>
+        <button class="ia-btn" style="border-color:rgba(127,200,232,.3);color:#7FC8E8" onclick="showView('videos')">Ver vídeo relacionado</button>
       </div>
     </div>`;
   atualizarBlocoIAEdgeProdutor();
@@ -1778,22 +2212,25 @@ function renderProdIA() {
 
 function renderProdCaderno() {
   const f = produtorAtual;
+  const enviadoAgora = !!f.lastRecordAt;
+  const dataRegistro = enviadoAgora ? formatDatePtBR(new Date(f.lastRecordAt)) : formatDatePtBR(dateDaysAgo(2));
+  const notaRegistro = escapeHtml(f.lastRecordNote || f.desafio);
   document.getElementById('prod-caderno-historico').innerHTML = `
     <div class="caderno-week">
       <div class="caderno-week-header" onclick="toggleWeek(this)">
         <span class="week-label">Semana ${f.semana} — Atual</span>
-        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">${formatDatePtBR(dateDaysAgo(2))}</span><span class="tag tag-green" style="font-size:.68rem">Enviado</span><span>▾</span></div>
+        <div style="display:flex;align-items:center;gap:.8rem"><span class="week-date">${dataRegistro}</span><span class="tag ${enviadoAgora ? 'tag-green' : 'tag-amber'}" style="font-size:.68rem">${enviadoAgora ? 'Enviado' : 'Aguardando envio'}</span><span>▾</span></div>
       </div>
       <div class="caderno-week-body">
         <div class="obs-grid">
-          <div class="obs-item"><div class="obs-label">Condição do Solo</div><div class="obs-value">Solo seco na área principal. Baixa umidade.</div></div>
+          <div class="obs-item"><div class="obs-label">Condição do Solo</div><div class="obs-value">${escapeHtml(f.solo)}</div></div>
           <div class="obs-item"><div class="obs-label">Clima</div><div class="obs-value">Sol forte. Chuva leve na quinta-feira.</div></div>
-          <div class="obs-item"><div class="obs-label">Atividades</div><div class="obs-value">Capina e adubação de cobertura em 1ha.</div></div>
-          <div class="obs-item"><div class="obs-label">Dúvidas</div><div class="obs-value">${f.desafio}</div></div>
+          <div class="obs-item"><div class="obs-label">Atividades</div><div class="obs-value">${enviadoAgora ? 'Foto do caderno enviada para análise.' : 'Nenhum envio nesta sessão.'}</div></div>
+          <div class="obs-item"><div class="obs-label">Dúvidas</div><div class="obs-value">${notaRegistro}</div></div>
         </div>
         <div style="margin-top:1rem;display:flex;align-items:center;gap:.8rem">
           <div class="foto-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A8C55" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-          <span style="font-size:.78rem;color:var(--cinza)">1 foto enviada</span>
+          <span style="font-size:.78rem;color:var(--cinza)">${enviadoAgora ? '1 foto enviada' : 'Nenhuma foto enviada ainda'}</span>
         </div>
       </div>
     </div>
@@ -1824,7 +2261,21 @@ const titles = {
   'prod-caderno':'Meu Caderno','prod-enviar':'Enviar Foto do Caderno'
 };
 
+const sections = {
+  dashboard:'Visão Geral',familias:'Gestão',ficha:'Gestão',
+  caderno:'Registros',novocaderno:'Registros',
+  ia:'Inteligência',videos:'Educação','sem-filhos':'Acesso',
+  relatorios:'Relatórios',
+  'prod-home':'Produtor','prod-ia':'Inteligência',
+  'prod-caderno':'Registros','prod-enviar':'Registros'
+};
+
 function showView(id) {
+  const adminMode = usuarioLogado && (usuarioLogado.role === 'admin' || usuarioLogado.role === 'coordenador');
+  if(adminMode && ['dashboard','familias','caderno'].includes(id)) {
+    renderAdminViews();
+    if(AUTH_MODE !== 'local') sincronizarAdminComApi(true);
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
   const el = document.getElementById('view-'+id);
@@ -1832,6 +2283,8 @@ function showView(id) {
   const btn = document.querySelector(`.sb-item[onclick*="'${id}'"]`);
   if(btn) btn.classList.add('active');
   document.getElementById('topbar-title').textContent = titles[id] || id;
+  const sectionEl = document.getElementById('topbar-section');
+  if(sectionEl) sectionEl.textContent = sections[id] || 'Nexus';
   if(id === 'dashboard') animateDashboardStats();
   if(id === 'caderno') updateTemporalLabels();
   updateTopbarClock();
@@ -1896,19 +2349,63 @@ function previewFotoProd(input) {
   }
 }
 
-function enviarFotoProd() {
+async function enviarFotoProd() {
   const img = document.getElementById('foto-preview-img-prod').src;
   if(!img || img === window.location.href) {
     showToast('Selecione uma foto do caderno antes de enviar.', 'warn');
     return;
   }
-  showToast('Foto enviada com sucesso! IA em análise.');
-  addLiveActivity('Foto do caderno enviada para análise de IA.');
-  showView('prod-ia');
+  try {
+    if(AUTH_MODE === 'local') {
+      produtorAtual = upsertFamilia({
+        ...produtorAtual,
+        status:'ativo',
+        cadastroStatus:'ativo',
+        engajamento: Math.min(100, Math.max(produtorAtual.engajamento || 0, 35) + 8),
+        lastRecordAt: new Date().toISOString(),
+        lastRecordNote: 'Foto do caderno enviada pelo produtor.'
+      });
+    } else {
+      const data = await requestAPI('/producers/me/caderno', {
+        method: 'POST',
+        body: JSON.stringify({
+          semana: produtorAtual?.semana || 1,
+          note: 'Foto do caderno enviada pelo produtor.'
+        })
+      });
+      produtorAtual = upsertFamilia({ ...data.familia, fromApi: true });
+    }
+    renderProdHome();
+    renderProdIA();
+    renderProdCaderno();
+    showToast('Foto enviada com sucesso! IA em análise.');
+    addLiveActivity('Foto do caderno enviada para análise de IA.');
+    showView('prod-ia');
+  } catch (err) {
+    if(isBackendConnectionError(err)) {
+      ativarModoDemoLocal('API local fora do ar');
+      produtorAtual = upsertFamilia({
+        ...produtorAtual,
+        status:'ativo',
+        cadastroStatus:'ativo',
+        engajamento: Math.min(100, Math.max(produtorAtual.engajamento || 0, 35) + 8),
+        lastRecordAt: new Date().toISOString(),
+        lastRecordNote: 'Foto do caderno enviada pelo produtor.'
+      });
+      renderProdHome();
+      renderProdIA();
+      renderProdCaderno();
+      showToast('Foto registrada em modo demo local.', 'warn');
+      showView('prod-ia');
+      return;
+    }
+    showToast(err.message || 'Não foi possível enviar a foto.', 'warn');
+  }
 }
 
 async function iniciarSessaoSeValida() {
   if(AUTH_MODE === 'local') {
+    ensureDemoAdminUsers();
     const sessao = getLocalSession();
     if(sessao) aplicarSessao(sessao);
     else document.getElementById('login-screen').style.display = 'flex';
@@ -1918,7 +2415,18 @@ async function iniciarSessaoSeValida() {
   try {
     const data = await requestAPI('/auth/me');
     aplicarSessao(data.user);
-  } catch (_e) {
+  } catch (err) {
+    if(isBackendConnectionError(err)) {
+      ativarModoDemoLocal('API local fora do ar');
+      const sessao = getLocalSession();
+      if(sessao) {
+        aplicarSessao(sessao);
+        return;
+      }
+      document.getElementById('login-screen').style.display = 'flex';
+      setLoginStatus('Modo demo local ativo. O app continua funcionando sem o backend.', false);
+      return;
+    }
     document.getElementById('login-screen').style.display = 'flex';
   }
 }

@@ -1,5 +1,8 @@
+import dotenv from "dotenv";
 import { upsertUserByEmail } from "./db.js";
 import { hashPassword } from "./password.js";
+
+dotenv.config();
 
 const seeds = [
   {
