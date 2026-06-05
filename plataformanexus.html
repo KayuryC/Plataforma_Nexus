@@ -1108,10 +1108,6 @@ const LOCAL_USERS_KEY = 'nexus_users_v1';
 const LOCAL_SESSION_KEY = 'nexus_session_v1';
 const MEMORY_AUTH_STORE = { users: [], session: null };
 const AI_TIMEOUT_MS = 18000;
-const DEMO_ADMIN_USERS = [
-  { id:'demo_admin_donato', name:'Donato Silva', email:'donato@nexus.local', password:'NexusFeira2026!', role:'admin', familyId:null },
-  { id:'demo_coord_marcelo', name:'Marcelo Heinen', email:'marcelo@nexus.local', password:'NexusFeira2026!', role:'coordenador', familyId:null }
-];
 let adminSyncTimer = null;
 let adminKnownProducerIds = null;
 let adminSyncInFlight = false;
@@ -1124,23 +1120,10 @@ function isBackendConnectionError(err) {
   return !!err?.backendOffline;
 }
 
-function ensureDemoAdminUsers() {
-  const users = getLocalUsers();
-  let changed = false;
-  DEMO_ADMIN_USERS.forEach(seed => {
-    if(!users.some(u => u.email === seed.email)) {
-      users.push({ ...seed, createdAt: new Date().toISOString(), demoUser: true });
-      changed = true;
-    }
-  });
-  if(changed) setLocalUsers(users);
-}
-
 function ativarModoDemoLocal(reason = '') {
   if(AUTH_MODE === 'local') return;
   AUTH_MODE = 'local';
   pararSincronizacaoAdmin();
-  ensureDemoAdminUsers();
   atualizarLoginUI();
   const msg = reason
     ? `Backend indisponível (${reason}). Ativei o modo demo local.`
@@ -1532,11 +1515,9 @@ function gerarIdUsuario() {
 }
 
 function loginLocal(email, password, roleEsperada) {
+  if(roleEsperada === 'admin') return null;
   const user = getLocalUsers().find(u => {
-    if(roleEsperada === 'admin' && !DEMO_ADMIN_USERS.some(seed => seed.email === u.email)) return false;
-    const roleOk = roleEsperada === 'admin'
-      ? (u.role === 'admin' || u.role === 'coordenador')
-      : u.role === roleEsperada;
+    const roleOk = u.role === roleEsperada;
     return u.email === email && u.password === password && roleOk;
   });
   return user || null;
@@ -1785,7 +1766,9 @@ async function fazerLogin() {
   try {
     const roleEsperada = perfil === 'admin' ? 'admin' : 'produtor';
     if(AUTH_MODE === 'local') {
-      ensureDemoAdminUsers();
+      if(roleEsperada === 'admin') {
+        throw new Error('Administrador precisa do backend ativo para autenticar.');
+      }
       const user = loginLocal(email, password, roleEsperada);
       if(!user) throw new Error('Credenciais inválidas.');
       setLocalSession(user);
@@ -1803,6 +1786,10 @@ async function fazerLogin() {
   } catch (err) {
     if(isBackendConnectionError(err)) {
       ativarModoDemoLocal('API local fora do ar');
+      if(perfil === 'admin') {
+        setLoginStatus('Backend fora do ar. O login de administrador requer a API ativa.', true);
+        return;
+      }
       try {
         const roleEsperada = perfil === 'admin' ? 'admin' : 'produtor';
         const user = loginLocal(email, password, roleEsperada);
@@ -1847,7 +1834,6 @@ async function cadastrarUsuario() {
   try {
     const role = 'produtor';
     if(AUTH_MODE === 'local') {
-      ensureDemoAdminUsers();
       const user = cadastrarLocal({ name, email, password, role });
       setLocalSession(user);
       aplicarSessao(user);
@@ -2405,7 +2391,6 @@ async function enviarFotoProd() {
 
 async function iniciarSessaoSeValida() {
   if(AUTH_MODE === 'local') {
-    ensureDemoAdminUsers();
     const sessao = getLocalSession();
     if(sessao) aplicarSessao(sessao);
     else document.getElementById('login-screen').style.display = 'flex';
